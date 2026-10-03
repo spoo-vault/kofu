@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Agreement, AgreementEvent, AgreementState } from '@kofu/shared';
 import { api } from '../lib/api';
 import { FirestoreService } from '../lib/firestoreService';
+import { SorobanEscrowClient } from '../lib/sorobanClient';
 import { PolicyBadge } from '../components/PolicyBadge';
 import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
 import { WalletModal } from '../components/WalletModal';
@@ -112,6 +113,51 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
     setActionLoading(true);
     setError(null);
     try {
+      const isRealBrowserWallet = walletId && walletId !== 'agent';
+      if (isRealBrowserWallet) {
+        try {
+          // Attempt real on-chain Soroban deposit via connected wallet popup
+          const onChainResult = await SorobanEscrowClient.fundEscrowOnChain(agreement);
+          const updatedAgr: Agreement = {
+            ...agreement,
+            status: 'ESCROWED',
+            escrowFunded: true,
+            stellarTxHash: onChainResult.txHash,
+            updatedAt: new Date().toISOString(),
+          };
+          setAgreement(updatedAgr);
+          await FirestoreService.saveAgreement(updatedAgr);
+          await FirestoreService.logEvent({
+            id: `ev-${Date.now()}`,
+            agreementId: agreement.id,
+            type: 'SOROBAN_LOCKBOX_SECURED',
+            message: `Escrow funded on Soroban contract CAXN...SVJS. Ledger: ${onChainResult.ledger || 'confirmed'}. Tx: ${onChainResult.txHash}`,
+            timestamp: updatedAgr.updatedAt,
+            actor: 'STELLAR_NETWORK',
+          });
+          return;
+        } catch (chainErr: any) {
+          console.warn('Real on-chain signing notice:', chainErr);
+          if (
+            chainErr.message?.includes('User declined') ||
+            chainErr.message?.includes('reject') ||
+            chainErr.message?.includes('cancel')
+          ) {
+            setError(`Transaction rejected by wallet user: ${chainErr.message}`);
+            return;
+          }
+          if (
+            chainErr.message?.includes('HostError') ||
+            chainErr.message?.includes('WasmVm') ||
+            chainErr.message?.includes('balance')
+          ) {
+            setError(`Stellar Testnet notice: ${chainErr.message}. Ensure your wallet has testnet XLM/USDC or use Testnet Agent.`);
+            return;
+          }
+        }
+      }
+
+      // Fallback to backend / synthetic agent escrow
       const res = await api.fundEscrow(agreement.id);
       setAgreement(res.agreement);
       setEvents(res.events);

@@ -9,7 +9,8 @@ import {
   AlertCircle,
   Loader2,
   Shield,
-  Smartphone
+  Smartphone,
+  Coins
 } from 'lucide-react';
 import {
   stellarWalletService,
@@ -42,6 +43,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
   const [showHelp, setShowHelp] = useState<boolean>(false);
+  const [faucetLoading, setFaucetLoading] = useState<boolean>(false);
+  const [faucetDone, setFaucetDone] = useState<boolean>(false);
   const [installed, setInstalled] = useState<InstalledStatus>({
     freighter: false,
     lobstr: false,
@@ -143,6 +146,26 @@ export const WalletModal: React.FC<WalletModalProps> = ({
   const handleDisconnect = async () => {
     await stellarWalletService.disconnect();
     onClose();
+  };
+
+  const handleRequestFaucet = async () => {
+    if (!activeAddress || faucetLoading) return;
+    setFaucetLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`https://friendbot.stellar.org?addr=${encodeURIComponent(activeAddress)}`);
+      if (res.ok) {
+        setFaucetDone(true);
+        setTimeout(() => setFaucetDone(false), 4000);
+      } else {
+        const text = await res.text();
+        setError(`Friendbot notice: ${text || 'Could not fund account.'}`);
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to request testnet XLM');
+    } finally {
+      setFaucetLoading(false);
+    }
   };
 
   const handleCopy = () => {
@@ -284,6 +307,30 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                   </button>
                 </div>
               </div>
+
+              {/* Instant Friendbot Testnet Airdrop */}
+              <button
+                onClick={handleRequestFaucet}
+                disabled={faucetLoading}
+                className="w-full py-2.5 px-3 rounded-xl bg-[#00FF66]/10 hover:bg-[#00FF66]/20 border border-[#00FF66]/30 text-xs font-mono text-[#00FF66] flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {faucetLoading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Requesting Friendbot 10,000 XLM...</span>
+                  </>
+                ) : faucetDone ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-[#00FF66]" />
+                    <span>Account Funded with 10,000 XLM!</span>
+                  </>
+                ) : (
+                  <>
+                    <Coins className="w-3.5 h-3.5" />
+                    <span>Airdrop 10,000 Testnet XLM (Friendbot)</span>
+                  </>
+                )}
+              </button>
 
               <div className="flex items-center space-x-2">
                 <a
