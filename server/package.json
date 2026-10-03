@@ -1,5 +1,5 @@
 {
-  "name": "poka-server",
+  "name": "kofu-server",
   "version": "0.1.0",
   "private": true,
   "type": "module",

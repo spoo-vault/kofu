@@ -15,7 +15,7 @@ import {
   Coins,
   FileCode,
 } from 'lucide-react';
-import { ParsedAgreementInput } from '@poka/shared';
+import { ParsedAgreementInput } from '@kofu/shared';
 import { api } from '../lib/api';
 
 interface HomePageProps {
@@ -222,7 +222,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationD
             </div>
             <h3 className="text-base font-bold text-[#F3F3F6]">Natural Language Intent</h3>
             <p className="text-xs text-[#848494] leading-relaxed">
-              Enter your terms in everyday language. POKA's dual parser (Gemini 2.0 + Deterministic heuristics) extracts amounts, currency, SLAs, counterparties, and strict policy envelopes.
+              Enter your terms in everyday language. KOFU's dual parser (Gemini 2.0 + Deterministic heuristics) extracts amounts, currency, SLAs, counterparties, and strict policy envelopes.
             </p>
             <div className="p-2.5 rounded bg-[#08080A] border border-[#1E1E28] text-[11px] text-[#505060]">
               &gt; "Pay 50 USDC when website PR merged"
@@ -250,7 +250,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationD
             </div>
             <h3 className="text-base font-bold text-[#F3F3F6]">Sentinel Autonomous Release</h3>
             <p className="text-xs text-[#848494] leading-relaxed">
-              The POKA Sentinel daemon continuously monitors condition signals (GitHub webhooks, API telemetry, or cryptographic delivery proofs) and automatically invokes settlement.
+              The KOFU Sentinel daemon continuously monitors condition signals (GitHub webhooks, API telemetry, or cryptographic delivery proofs) and automatically invokes settlement.
             </p>
             <div className="p-2.5 rounded bg-[#08080A] border border-[#1E1E28] text-[11px] text-[#848494]">
               &gt; settle() ➔ Payment Released to Seller

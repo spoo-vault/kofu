@@ -1,7 +1,7 @@
 {
-  "name": "poka",
+  "name": "kofu",
   "version": "0.1.0",
-  "description": "POKA - Make promises programmable. Autonomous economic agreement protocol on Stellar and Soroban.",
+  "description": "KOFU - Make promises programmable. Autonomous economic agreement protocol on Stellar and Soroban.",
   "private": true,
   "scripts": {
     "build": "npm --prefix client run build",
@@ -10,6 +10,6 @@
     "install:all": "npm --prefix server install && npm --prefix client install",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
-    "test:contracts": "cargo test --manifest-path contracts/soroban-poka-escrow/Cargo.toml"
+    "test:contracts": "cargo test --manifest-path contracts/soroban-kofu-escrow/Cargo.toml"
   }
 }

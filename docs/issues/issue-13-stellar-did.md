@@ -5,7 +5,7 @@ In an open multi-agent economy, buyer agents need to know the historical reliabi
 
 ## Scope & Target Files
 - Target files:
-  - `contracts/soroban-poka-escrow/src/reputation.rs` (Reputation tracking submodule)
+  - `contracts/soroban-kofu-escrow/src/reputation.rs` (Reputation tracking submodule)
   - `server/src/routes/agents.ts` (Agent reputation queries and badges)
   - `client/src/pages/NegotiationPage.tsx` (Displaying agent credit score in negotiation feed)
 

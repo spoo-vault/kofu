@@ -1,12 +1,12 @@
 # Stellar Community Fund (SCF) Build Award Proposal
 
 ## Project Information
-* **Project Name**: POKA (Programmable On-chain Knowledge Agreements)
+* **Project Name**: KOFU (Programmable On-chain Knowledge Agreements)
 * **Tagline**: Autonomous Economic Agreement Protocol on Stellar & Soroban
 * **Category**: AI & Autonomous Agents / Payments & Escrow Infrastructure
 * **Integration Track / Open Track**: Integration Track
-* **Repository**: [https://github.com/spoo-vault/poka](https://github.com/spoo-vault/poka)
-* **Demo URL**: [https://poka.vercel.app](https://poka.vercel.app)
+* **Repository**: [https://github.com/spoo-vault/kofu](https://github.com/spoo-vault/kofu)
+* **Demo URL**: [https://kofu-stellar.web.app](https://kofu-stellar.web.app)
 * **Target Network**: Stellar Mainnet (via Soroban Smart Contracts)
 * **Assets Supported**: Stellar Native XLM, Circle USDC, EURC
 
@@ -21,16 +21,16 @@ In the modern digital economy—from freelance gigs and micro-bounties to emergi
 
 However, traditional legal contracts are too slow and expensive for small and medium transactions ($10 – $1,000). Existing crypto escrows require technical knowledge of smart contract calls, ABI encoding, and manual dispute arbitration. As autonomous AI agents proliferate, they require a trustless, automated economic settlement layer to negotiate terms, lock funds, verify fulfillment, and settle value deterministically.
 
-### The Solution: POKA
-POKA bridges natural language human/agent communication and deterministic on-chain settlement:
+### The Solution: KOFU
+KOFU bridges natural language human/agent communication and deterministic on-chain settlement:
 1. **Natural Language Parser**: Parses intents into structured JSON agreements using Google Gemini 2.0 Flash with a high-accuracy deterministic fallback.
 2. **Policy & Permission Guardrails**: Enforces velocity caps (e.g. 100 USDC single transaction max, 75 USDC autonomous negotiation threshold).
-3. **Soroban Escrow Smart Contract**: Holds funds trustlessly in a high-efficiency Rust WebAssembly contract (`soroban-poka-escrow`).
-4. **POKA Sentinel**: An autonomous monitoring daemon that watches completion signals and automatically triggers on-chain settlement without requiring manual human clicks.
+3. **Soroban Escrow Smart Contract**: Holds funds trustlessly in a high-efficiency Rust WebAssembly contract (`soroban-kofu-escrow`).
+4. **KOFU Sentinel**: An autonomous monitoring daemon that watches completion signals and automatically triggers on-chain settlement without requiring manual human clicks.
 
 ### Verified Need & Ecosystem Traction
 - **Working MVP**: A functional full-stack prototype is already live with native Soroban Rust smart contracts compiled and tested (`cargo test`), Node.js backend with `@stellar/stellar-sdk`, and React 18 client with Freighter wallet support.
-- **Micro-Payment Viability**: Stellar is uniquely suited for POKA because average transaction fees are fractions of a cent (< $0.0001), enabling micro-escrows ($5 to $50) that are impossible on Ethereum or Layer 2s due to gas costs.
+- **Micro-Payment Viability**: Stellar is uniquely suited for KOFU because average transaction fees are fractions of a cent (< $0.0001), enabling micro-escrows ($5 to $50) that are impossible on Ethereum or Layer 2s due to gas costs.
 - **Target Audience**: Freelancers, DAO bounty managers, AI agent developers (LangChain, AutoGen, CrewAI), and decentralized service marketplaces on Stellar.
 
 ---
@@ -47,7 +47,7 @@ POKA bridges natural language human/agent communication and deterministic on-cha
                             │
                             ▼
 ┌────────────────────────────────────────────────────────┐
-│            POKA Agent Orchestration Layer              │
+│            KOFU Agent Orchestration Layer              │
 │  - Agreement Parser (Gemini 2.0 + Deterministic)       │
 │  - Policy Engine (Velocity Caps & Spend Envelopes)     │
 │  - Autonomous Agent Negotiator (SLA & Counter-offers)  │
@@ -55,7 +55,7 @@ POKA bridges natural language human/agent communication and deterministic on-cha
                             │
                             ▼
 ┌────────────────────────────────────────────────────────┐
-│                 POKA Sentinel Service                  │
+│                 KOFU Sentinel Service                  │
 │  - State Machine (DRAFT ➔ ESCROWED ➔ SETTLED)         │
 │  - Off-chain Telemetry / Verification Oracles          │
 │  - Automated Settlement Invocation                     │
@@ -64,7 +64,7 @@ POKA bridges natural language human/agent communication and deterministic on-cha
                             ▼
 ┌────────────────────────────────────────────────────────┐
 │              Stellar & Soroban Layer                   │
-│  - soroban-poka-escrow (Rust Contract on Wasm)         │
+│  - soroban-kofu-escrow (Rust Contract on Wasm)         │
 │  - Stellar Horizon + Soroban RPC Server                │
 │  - Asset Support (Native XLM, Circle USDC, EURC)       │
 │  - Freighter Browser Wallet Integration                │
@@ -73,7 +73,7 @@ POKA bridges natural language human/agent communication and deterministic on-cha
 
 ### How Stellar is Meaningfully Integrated
 Stellar is not a superficial addon or storage layer; it is the **core settlement and security engine**:
-1. **Soroban Smart Contract (`soroban-poka-escrow`)**:
+1. **Soroban Smart Contract (`soroban-kofu-escrow`)**:
    - Manages escrow state, locking buyer tokens and enforcing conditions (`initialize`, `deposit`, `mark_condition_met`, `settle`, `refund`, `dispute`).
    - Leverages Soroban's native auth framework (`Address::require_auth`) and Time-To-Live (TTL) storage persistence.
 2. **Stablecoin Payment Rails**:
@@ -85,19 +85,19 @@ Stellar is not a superficial addon or storage layer; it is the **core settlement
 
 ## 3. Three-Tranche Milestone Plan & Budget
 
-POKA follows the official SCF Build Award 3-tranche structure with verifiable deliverables, timelines, and budgets:
+KOFU follows the official SCF Build Award 3-tranche structure with verifiable deliverables, timelines, and budgets:
 
 ### Tranche 1: Core Soroban MVP & Agent Parser
 * **Target Duration**: Month 1 – 2
 * **Budget**: $18,000 USD (in XLM)
 * **Deliverables**:
-  1. Complete Rust Soroban escrow smart contract (`soroban-poka-escrow`) supporting token deposits, condition flags, release, and timeout refunds.
+  1. Complete Rust Soroban escrow smart contract (`soroban-kofu-escrow`) supporting token deposits, condition flags, release, and timeout refunds.
   2. 100% unit test coverage using `soroban-sdk` testutils with mock token clients.
   3. LLM Natural Language Agreement Parser supporting Gemini 2.0 and deterministic regex fallback for Stellar assets (XLM, USDC, EURC).
   4. Functional Web UI with command terminal, lifecycle stepper, and Freighter wallet connection.
 * **Verification Criteria**:
   - Open source GitHub repository with passing `cargo test` command.
-  - Live demo deployment on Vercel connected to Stellar Testnet.
+  - Live demo deployment connected to Stellar Testnet.
   - Testnet transaction hashes visible on StellarExpert.
 
 ### Tranche 2: Testnet Pilot, Oracle Verification & Threat Modeling
@@ -121,7 +121,7 @@ POKA follows the official SCF Build Award 3-tranche structure with verifiable de
   1. Mainnet Soroban smart contract audit and deployment.
   2. Support for Freighter Passkeys / WebAuthn session keys for seamless agent delegation without signing every micro-transaction.
   3. Fiat on/off-ramp integration via Stellar Anchors (SEP-24 / SEP-31) for frictionless funding.
-  4. Public SDK (`@poka/sdk`) for easy embedding into other Stellar ecosystem dApps.
+  4. Public SDK (`@kofu/sdk`) for easy embedding into other Stellar ecosystem dApps.
 * **Verification Criteria**:
   - Verified Soroban contract deployed on Stellar Mainnet.
   - Independent security audit report published.
@@ -131,10 +131,10 @@ POKA follows the official SCF Build Award 3-tranche structure with verifiable de
 
 ## 4. Final-Tranche Metric Commitment (Integration Track)
 
-As required by the SCF Integration Track guidelines, POKA commits to the following verifiable on-chain metrics:
+As required by the SCF Integration Track guidelines, KOFU commits to the following verifiable on-chain metrics:
 * **Metric Type**: Cumulative payment and transaction escrow volume on Stellar Mainnet.
 * **Proposed Threshold**:
-  - **$25,000 USD equivalent** in cumulative volume settled through the POKA Soroban Escrow contract.
+  - **$25,000 USD equivalent** in cumulative volume settled through the KOFU Soroban Escrow contract.
   - **At least 150 unique completed economic agreements**.
 * **Measurement Window**: Within 90 days following Mainnet deployment.
 * **Registered On-Chain Footprint**:
@@ -144,11 +144,11 @@ As required by the SCF Integration Track guidelines, POKA commits to the followi
 ---
 
 ## 5. Threat Model & Monitoring Readiness Summary
-In accordance with SCF Build Award Tranche #2 requirements, POKA has established:
-* **STRIDE Threat Model**: Detailed in [docs/threat-model.md](file:///c:/Users/HP/bitsgo/poka/docs/threat-model.md). Covers spoofing of Sentinel verification signals, prompt injection into the AI parser, replay attacks, and Soroban storage exhaustion.
-* **On-Chain Monitoring Plan**: Detailed in [docs/monitoring-plan.md](file:///c:/Users/HP/bitsgo/poka/docs/monitoring-plan.md). Covers real-time indexers for `(poka, deposit)`, `(poka, settled)`, and `(poka, disputed)` events, with alerts for anomalous settlement volume or sudden spike in refunds.
+In accordance with SCF Build Award Tranche #2 requirements, KOFU has established:
+* **STRIDE Threat Model**: Detailed in [docs/threat-model.md](./threat-model.md). Covers spoofing of Sentinel verification signals, prompt injection into the AI parser, replay attacks, and Soroban storage exhaustion.
+* **On-Chain Monitoring Plan**: Detailed in [docs/monitoring-plan.md](./monitoring-plan.md). Covers real-time indexers for `(kofu, deposit)`, `(kofu, settled)`, and `(kofu, disputed)` events, with alerts for anomalous settlement volume or sudden spike in refunds.
 
 ---
 
 ## 6. Open Source Commitment
-All POKA smart contracts, SDKs, and backend services are released under the permissive **MIT License** and will remain 100% public goods for the Stellar developer community.
+All KOFU smart contracts, SDKs, and backend services are released under the permissive **MIT License** and will remain 100% public goods for the Stellar developer community.

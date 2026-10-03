@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for picking up a POKA Drips Wave task! Please read the requirements below before starting work.
+        Thanks for picking up a KOFU Drips Wave task! Please read the requirements below before starting work.
   - type: input
     id: task_id
     attributes:

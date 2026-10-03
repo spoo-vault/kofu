@@ -1,7 +1,7 @@
 # [DRIPS-08]: PostgreSQL Storage Engine with Prisma ORM
 
 ## Context & Problem
-The MVP utilizes a file-backed JSON store (`poka-db.json`), which works well for local testing and lightweight hackathon demos. For production scale with concurrent agent requests, POKA needs a robust relational database with ACID transactions and migration tooling.
+The MVP utilizes a file-backed JSON store (`kofu-db.json`), which works well for local testing and lightweight hackathon demos. For production scale with concurrent agent requests, KOFU needs a robust relational database with ACID transactions and migration tooling.
 
 ## Scope & Target Files
 - Target files:

@@ -10,7 +10,7 @@ To maintain an immutable, high-performance audit ledger of every deposit, condit
 
 ## Acceptance Criteria
 - [ ] Connects to Soroban RPC `getEvents` with paging tokens starting from contract deployment ledger.
-- [ ] Filters topics `poka:deposit`, `poka:cond_met`, `poka:settled`, `poka:refunded`, `poka:disputed`.
+- [ ] Filters topics `kofu:deposit`, `kofu:cond_met`, `kofu:settled`, `kofu:refunded`, `kofu:disputed`.
 - [ ] Decodes XDR data structures into typed TypeScript JSON records.
 - [ ] Automatically resumes from last saved ledger sequence upon service restart.
 - [ ] Includes CLI command: `npm run indexer:sync`.

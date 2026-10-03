@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Builds and deploys the POKA Escrow Soroban contract to Stellar Testnet.
+  Builds and deploys the KOFU Escrow Soroban contract to Stellar Testnet.
 .DESCRIPTION
   Requires Stellar CLI (stellar) or cargo with wasm32-unknown-unknown target.
 #>
@@ -12,9 +12,9 @@ param(
 )
 
 Write-Host "==> Building Soroban Escrow Contract (wasm32-unknown-unknown)..." -ForegroundColor Cyan
-cargo build --target wasm32-unknown-unknown --release --manifest-path contracts/soroban-poka-escrow/Cargo.toml
+cargo build --target wasm32-unknown-unknown --release --manifest-path contracts/soroban-kofu-escrow/Cargo.toml
 
-$wasmPath = "contracts/soroban-poka-escrow/target/wasm32-unknown-unknown/release/soroban_poka_escrow.wasm"
+$wasmPath = "contracts/soroban-kofu-escrow/target/wasm32-unknown-unknown/release/soroban_kofu_escrow.wasm"
 
 if (Test-Path $wasmPath) {
   $fileSize = (Get-Item $wasmPath).Length

@@ -1,7 +1,7 @@
 # [DRIPS-03]: Stellar SEP-10 Web Authentication Integration
 
 ## Context & Problem
-Currently, API requests to create and fund agreements are initiated via client-provided keys. To provide non-custodial cryptographic authentication matching Stellar ecosystem standards, POKA should implement **SEP-10: Stellar Web Authentication**. This allows users and autonomous agents to prove ownership of their Stellar account via cryptographic challenge transactions before creating agreements or accessing private negotiation channels.
+Currently, API requests to create and fund agreements are initiated via client-provided keys. To provide non-custodial cryptographic authentication matching Stellar ecosystem standards, KOFU should implement **SEP-10: Stellar Web Authentication**. This allows users and autonomous agents to prove ownership of their Stellar account via cryptographic challenge transactions before creating agreements or accessing private negotiation channels.
 
 ## Scope & Target Files
 - Target files:

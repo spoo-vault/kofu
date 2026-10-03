@@ -1,8 +1,8 @@
 [package]
-name = "soroban-poka-escrow"
+name = "soroban-kofu-escrow"
 version = "0.1.0"
 edition = "2021"
-description = "POKA Autonomous Economic Agreement Escrow Smart Contract on Soroban"
+description = "KOFU Autonomous Economic Agreement Escrow Smart Contract on Soroban"
 license = "MIT"
 
 [lib]

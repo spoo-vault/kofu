@@ -7,7 +7,7 @@ Soroban uses a state archival model where contract instance and persistent stora
 - Target files:
   - `server/src/services/stellar/ttl-manager.ts` (New service)
   - `server/src/services/stellar/escrow.ts` (Soroban TTL extension invocation)
-  - `contracts/soroban-poka-escrow/src/lib.rs` (Extend TTL helper method)
+  - `contracts/soroban-kofu-escrow/src/lib.rs` (Extend TTL helper method)
 
 ## Acceptance Criteria
 - [ ] Create a scheduled background cron or worker in `server/src/services/stellar/ttl-manager.ts` that runs every 6 hours.

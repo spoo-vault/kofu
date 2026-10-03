@@ -44,16 +44,22 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, selected
             onClick={() => onNavigate('home')}
             className="flex items-center space-x-2 text-left group focus:outline-none"
           >
-            <div className="w-8 h-8 rounded border border-[#00FF66]/30 bg-[#00FF66]/10 flex items-center justify-center text-[#00FF66] font-mono font-bold text-sm tracking-tighter group-hover:border-[#00FF66] transition-colors">
-              K
-            </div>
-            <div>
-              <div className="flex items-center space-x-1.5">
-                <span className="font-mono text-base font-bold tracking-wider text-[#F3F3F6]">KOFU</span>
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#00FF66] animate-pulse"></span>
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded border border-[#1E1E28] bg-white flex items-center justify-center p-1 overflow-hidden group-hover:border-[#00FF66] transition-colors shadow-[0_0_10px_rgba(0,255,102,0.15)]">
+                <img
+                  src="/kofu-logo.png"
+                  alt="KOFU Logo"
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <div className="text-[10px] font-mono tracking-widest text-[#848494] uppercase">
-                Autonomous Escrow on Stellar
+              <div>
+                <div className="flex items-center space-x-1.5">
+                  <span className="font-mono text-base font-bold tracking-wider text-[#F3F3F6]">KOFU</span>
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#00FF66] animate-pulse"></span>
+                </div>
+                <div className="text-[10px] font-mono tracking-widest text-[#848494] uppercase">
+                  Autonomous Escrow on Stellar
+                </div>
               </div>
             </div>
           </button>

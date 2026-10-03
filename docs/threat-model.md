@@ -1,4 +1,4 @@
-# POKA — Official STRIDE Threat Model
+# KOFU — Official STRIDE Threat Model
 
 > Prepared in compliance with the **Stellar Development Foundation (SDF) Threat Modeling Readiness Guide** for Soroban smart contracts and decentralized applications.
 
@@ -6,11 +6,11 @@
 
 ## 1. System Overview & Data Flow Diagram (DFD)
 
-POKA operates across four distinct trust boundaries:
+KOFU operates across four distinct trust boundaries:
 1. **Client / User Interface**: Browser running React with Freighter wallet.
 2. **Off-Chain Orchestration & Sentinel**: Node.js backend executing Gemini parsing, policy checks, and oracle condition verification.
 3. **External Oracles**: GitHub, third-party APIs, and decentralized agent messaging (MCP).
-4. **On-Chain Soroban Execution Layer**: Stellar ledger and WebAssembly smart contract (`soroban-poka-escrow`).
+4. **On-Chain Soroban Execution Layer**: Stellar ledger and WebAssembly smart contract (`soroban-kofu-escrow`).
 
 ```
 [ User Browser / Freighter ]
@@ -19,7 +19,7 @@ POKA operates across four distinct trust boundaries:
 [ External Internet / HTTPS ] ──── [ LLM / Gemini 2.0 API ]
        │                                     │
        ▼                                     ▼
-[ POKA Sentinel Daemon ] ◄──── [ Webhook / Oracle Sources ]
+[ KOFU Sentinel Daemon ] ◄──── [ Webhook / Oracle Sources ]
        │  (2) require_auth + Cryptographic Proof Hash
        ▼
 [ Stellar Network (Horizon / Soroban RPC) ]
@@ -39,7 +39,7 @@ POKA operates across four distinct trust boundaries:
 
 | Asset ID | Description | Impact of Compromise |
 | :--- | :--- | :--- |
-| **A-1: Escrow Vault Tokens** | XLM, USDC, EURC locked inside `PokaEscrowContract`. | High financial loss if drained or settled to unauthorized addresses. |
+| **A-1: Escrow Vault Tokens** | XLM, USDC, EURC locked inside `KofuEscrowContract`. | High financial loss if drained or settled to unauthorized addresses. |
 | **A-2: Sentinel Signing Keys** | Secret key controlling the Sentinel agent authorized to mark conditions and trigger settlement. | Malicious premature release of funds or unauthorized aborts. |
 | **A-3: Agreement State Data** | Persistent agreement details stored in Soroban ledger storage. | Contract reverts or state corruption if TTL expires unextended. |
 | **A-4: User Spending Policies** | Velocity limits ($100 max tx, $75 auto-negotiate). | Overspending or runaway agent loops if bypassed. |
@@ -72,7 +72,7 @@ POKA operates across four distinct trust boundaries:
 * **Threat R-1: Buyer claims they never funded the agreement or seller claims they were never paid.**
   * *Vector*: Dispute over payment delivery off-chain.
   * *Severity*: **Low**
-  * *Mitigation*: Every deposit, settlement, and refund emits an immutable on-chain Soroban event (`(symbol_short!("poka"), symbol_short!("deposit"))` and `(symbol_short!("poka"), symbol_short!("settled"))`), indexed and permanently verifiable on StellarExpert.
+  * *Mitigation*: Every deposit, settlement, and refund emits an immutable on-chain Soroban event (`(symbol_short!("kofu"), symbol_short!("deposit"))` and `(symbol_short!("kofu"), symbol_short!("settled"))`), indexed and permanently verifiable on StellarExpert.
 
 ### 3.4. Information Disclosure (Data Leakage)
 * **Threat I-1: Exposure of sensitive business contract terms or client secrets.**
@@ -88,7 +88,7 @@ POKA operates across four distinct trust boundaries:
 * **Threat D-2: Horizon / Soroban RPC rate limiting flooding.**
   * *Vector*: Heavy agent traffic exhausts public Horizon server limits.
   * *Severity*: **Low**
-  * *Mitigation*: POKA utilizes automated retry backoff with fallback RPC providers and local caching for non-state-changing queries.
+  * *Mitigation*: KOFU utilizes automated retry backoff with fallback RPC providers and local caching for non-state-changing queries.
 
 ### 3.6. Elevation of Privilege (Unauthorized Execution)
 * **Threat E-1: Buyer refunds escrow before seller delivery deadline has expired.**
@@ -118,6 +118,6 @@ POKA operates across four distinct trust boundaries:
 ---
 
 ## 5. Security Recommendations for Tranche 2 & 3
-1. **Third-Party Formal Audit**: Conduct a dedicated audit of `soroban-poka-escrow` prior to Mainnet deployment.
+1. **Third-Party Formal Audit**: Conduct a dedicated audit of `soroban-kofu-escrow` prior to Mainnet deployment.
 2. **Decentralized Multi-Sig Admin**: Migrate admin keys from single-signature to a Stellar multisig or Soroban DAO controller.
 3. **Automated Fuzzing**: Implement `cargo-fuzz` property-based testing on all numeric boundary conditions (overflows, zero deposits, sub-cent rounding).

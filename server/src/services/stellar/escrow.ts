@@ -13,7 +13,7 @@ export interface EscrowDepositParams {
 
 export class StellarEscrowService {
   /**
-   * Simulates or broadcasts a deposit into the Soroban PokaEscrow contract
+   * Simulates or broadcasts a deposit into the Soroban KofuEscrow contract
    */
   public async deposit(params: EscrowDepositParams): Promise<Transaction> {
     const randomHex = Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');

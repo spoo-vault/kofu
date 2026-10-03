@@ -12,7 +12,7 @@ export interface NegotiationStepResult {
 
 export class AgentNegotiator {
   /**
-   * Simulates an autonomous negotiation sequence between POKA Buyer Agent and Counterparty Agent
+   * Simulates an autonomous negotiation sequence between KOFU Buyer Agent and Counterparty Agent
    */
   public static simulateNegotiation(
     initialAmount: number,

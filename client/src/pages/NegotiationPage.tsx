@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NegotiationMessage, Agreement } from '@poka/shared';
+import { NegotiationMessage, Agreement } from '@kofu/shared';
 import { api } from '../lib/api';
 import { Cpu, ShieldCheck, Check, ArrowRight, Play, RefreshCw, Layers } from 'lucide-react';
 
@@ -132,7 +132,7 @@ export const NegotiationPage: React.FC<NegotiationPageProps> = ({
         <div className="p-4 bg-[#0D0D11] border border-[#1E1E28] rounded">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] text-[#00FF66] font-bold tracking-wider uppercase">
-              POKA Buyer Agent
+              KOFU Buyer Agent
             </span>
             <span className="text-[10px] text-[#848494] bg-[#121217] px-2 py-0.5 rounded border border-[#1E1E28]">
               0x71C...49b
@@ -230,7 +230,7 @@ export const NegotiationPage: React.FC<NegotiationPageProps> = ({
                 disabled={creating}
                 className="px-8 py-3 bg-[#00FF66] hover:bg-[#00D154] text-[#08080A] font-bold text-xs uppercase tracking-wider rounded transition-all shadow-[0_0_15px_rgba(0,255,102,0.2)] cursor-pointer"
               >
-                {creating ? 'COMMITTING TO ESCROW...' : 'CREATE AGREEMENT (#POKA-001)'}
+                {creating ? 'COMMITTING TO ESCROW...' : 'CREATE AGREEMENT (#KOFU-001)'}
               </button>
             </div>
           </div>

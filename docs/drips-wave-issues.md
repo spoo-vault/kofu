@@ -1,4 +1,4 @@
-# POKA — Drips Wave Maintainer Issues & Bounties
+# KOFU — Drips Wave Maintainer Issues & Bounties
 
 > This directory catalogs 15 curated issues ready to be posted for **Drips Wave** maintainers and contributors. Individual issue templates with full specifications are located in [`docs/issues/`](./issues/).
 

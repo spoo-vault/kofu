@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ParsedAgreementInput, AutonomyLevel, Agreement } from '@poka/shared';
+import { ParsedAgreementInput, AutonomyLevel, Agreement } from '@kofu/shared';
 import { PolicyBadge } from '../components/PolicyBadge';
 import { api } from '../lib/api';
 import { ArrowLeft, CheckCircle2, Edit3, ShieldAlert, Cpu, Layers } from 'lucide-react';

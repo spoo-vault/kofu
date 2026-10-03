@@ -38,7 +38,7 @@ class DataStore {
       storageDir = '/tmp';
     }
 
-    this.filePath = path.join(storageDir, 'poka-db.json');
+    this.filePath = path.join(storageDir, 'kofu-db.json');
     this.loadFromDisk();
   }
 
@@ -68,7 +68,7 @@ class DataStore {
         }
       }
     } catch (err) {
-      console.warn('[POKA DB] No existing DB file or failed to read. Starting with clean state.');
+      console.warn('[KOFU DB] No existing DB file or failed to read. Starting with clean state.');
     }
   }
 
@@ -82,7 +82,7 @@ class DataStore {
       };
       fs.writeFileSync(this.filePath, JSON.stringify(data, null, 2), 'utf-8');
     } catch (err) {
-      console.warn('[POKA DB] Persistence write skipped:', (err as Error)?.message);
+      console.warn('[KOFU DB] Persistence write skipped:', (err as Error)?.message);
     }
   }
 

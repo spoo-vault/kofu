@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ParsedAgreementInput, Agreement, SentinelStatus } from '@poka/shared';
+import { ParsedAgreementInput, Agreement, SentinelStatus } from '@kofu/shared';
 import { Navbar } from './components/Navbar';
 import { StatusBar } from './components/StatusBar';
 import { HomePage } from './pages/HomePage';

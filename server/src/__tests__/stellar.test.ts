@@ -2,7 +2,7 @@ import { stellarAccountService } from '../services/stellar/account.js';
 import { stellarConfig, getExplorerTxUrl } from '../services/stellar/config.js';
 
 function runTests() {
-  console.log('--- RUNNING POKA STELLAR SERVICE TESTS ---');
+  console.log('--- RUNNING KOFU STELLAR SERVICE TESTS ---');
 
   // Test 1: Keypair generation
   const pair = stellarAccountService.generateKeypair();

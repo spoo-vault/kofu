@@ -1,12 +1,12 @@
 # [DRIPS-05]: Multi-Sig Arbiter Resolution Contract
 
 ## Context & Problem
-In `soroban-poka-escrow`, the `resolve_dispute` function currently accepts single-admin resolutions. To achieve full decentralization for contested agreements, we need an M-of-N multi-sig arbitration module or integration where a panel of designated community arbiters can vote on how to split disputed funds between buyer and seller.
+In `soroban-kofu-escrow`, the `resolve_dispute` function currently accepts single-admin resolutions. To achieve full decentralization for contested agreements, we need an M-of-N multi-sig arbitration module or integration where a panel of designated community arbiters can vote on how to split disputed funds between buyer and seller.
 
 ## Scope & Target Files
 - Target files:
-  - `contracts/soroban-poka-escrow/src/lib.rs` (Arbiter quorum data structures)
-  - `contracts/soroban-poka-escrow/src/test.rs` (Unit tests for dispute quorum voting)
+  - `contracts/soroban-kofu-escrow/src/lib.rs` (Arbiter quorum data structures)
+  - `contracts/soroban-kofu-escrow/src/test.rs` (Unit tests for dispute quorum voting)
 
 ## Acceptance Criteria
 - [ ] Add an `Arbiters(Vec<Address>)` and `Threshold(u32)` configuration to contract storage.

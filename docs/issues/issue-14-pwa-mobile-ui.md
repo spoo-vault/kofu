@@ -1,7 +1,7 @@
 # [DRIPS-14]: Progressive Web App (PWA) & Mobile UX Optimization
 
 ## Context & Problem
-Freelancers and gig workers predominantly manage task agreements and track payment releases on mobile smartphones. Converting POKA into an installable **Progressive Web App (PWA)** with responsive layouts, push notifications for escrow funding, and offline caching improves real-world accessibility.
+Freelancers and gig workers predominantly manage task agreements and track payment releases on mobile smartphones. Converting KOFU into an installable **Progressive Web App (PWA)** with responsive layouts, push notifications for escrow funding, and offline caching improves real-world accessibility.
 
 ## Scope & Target Files
 - Target files:

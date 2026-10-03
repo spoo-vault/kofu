@@ -1,4 +1,4 @@
-import { Agreement, AgreementEvent, Transaction, SentinelStatus, ParsedAgreementInput } from '@poka/shared';
+import { Agreement, AgreementEvent, Transaction, SentinelStatus, ParsedAgreementInput } from '@kofu/shared';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 

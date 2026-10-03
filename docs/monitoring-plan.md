@@ -1,4 +1,4 @@
-# POKA — On-Chain Monitoring Plan (Builders Template)
+# KOFU — On-Chain Monitoring Plan (Builders Template)
 
 > Prepared in compliance with the **SDF On-Chain Monitoring Plan Template for Builders** on Stellar and Soroban.
 
@@ -7,29 +7,29 @@
 ## 1. System Scope & Monitored Infrastructure
 
 ### 1.1. Core Smart Contracts
-* **Contract Name**: `soroban-poka-escrow`
+* **Contract Name**: `soroban-kofu-escrow`
 * **Network**: Stellar Testnet & Mainnet
 * **Soroban Contract ID**: `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`
 * **Admin Address**: `GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5`
 
 ### 1.2. Off-Chain Components
-* **POKA Sentinel Daemon**: Watches Stellar ledger events, parses external fulfillment signals, and signs settlements.
+* **KOFU Sentinel Daemon**: Watches Stellar ledger events, parses external fulfillment signals, and signs settlements.
 * **Stellar Horizon / Soroban RPC Stream**: Ingestion endpoint for contract events and ledger transaction feeds.
 
 ---
 
 ## 2. On-Chain Event Emissions Specification
 
-The `soroban-poka-escrow` smart contract emits structured events for every critical lifecycle transition. All events are indexed by the Sentinel daemon and public blockchain explorers:
+The `soroban-kofu-escrow` smart contract emits structured events for every critical lifecycle transition. All events are indexed by the Sentinel daemon and public blockchain explorers:
 
 | Event Type | Topic 0 | Topic 1 | Data Payload | Purpose / Observability |
 | :--- | :--- | :--- | :--- | :--- |
-| **Deposit** | `symbol_short!("poka")` | `symbol_short!("deposit")` | `(agreement_id, buyer, seller, amount)` | Track capital inflows, active agreement count, and buyer addresses. |
-| **Condition Met** | `symbol_short!("poka")` | `symbol_short!("cond_met")` | `(agreement_id, proof_hash)` | Verifies off-chain condition verification before settlement. |
-| **Settled** | `symbol_short!("poka")` | `symbol_short!("settled")` | `(agreement_id, seller, amount)` | Track capital outflows to sellers and successful contract resolutions. |
-| **Refunded** | `symbol_short!("poka")` | `symbol_short!("refunded")` | `(agreement_id, buyer, amount)` | Monitor failed deliveries, timeouts, or Sentinel cancellations. |
-| **Disputed** | `symbol_short!("poka")` | `symbol_short!("disputed")` | `(agreement_id, caller)` | Trigger immediate human / arbiter notification for contested escrows. |
-| **Resolved** | `symbol_short!("poka")` | `symbol_short!("resolved")` | `(agreement_id, buyer_payout, seller_payout)` | Track dispute resolution payouts and split ratios. |
+| **Deposit** | `symbol_short!("kofu")` | `symbol_short!("deposit")` | `(agreement_id, buyer, seller, amount)` | Track capital inflows, active agreement count, and buyer addresses. |
+| **Condition Met** | `symbol_short!("kofu")` | `symbol_short!("cond_met")` | `(agreement_id, proof_hash)` | Verifies off-chain condition verification before settlement. |
+| **Settled** | `symbol_short!("kofu")` | `symbol_short!("settled")` | `(agreement_id, seller, amount)` | Track capital outflows to sellers and successful contract resolutions. |
+| **Refunded** | `symbol_short!("kofu")` | `symbol_short!("refunded")` | `(agreement_id, buyer, amount)` | Monitor failed deliveries, timeouts, or Sentinel cancellations. |
+| **Disputed** | `symbol_short!("kofu")` | `symbol_short!("disputed")` | `(agreement_id, caller)` | Trigger immediate human / arbiter notification for contested escrows. |
+| **Resolved** | `symbol_short!("kofu")` | `symbol_short!("resolved")` | `(agreement_id, buyer_payout, seller_payout)` | Track dispute resolution payouts and split ratios. |
 
 ---
 
@@ -56,7 +56,7 @@ The `soroban-poka-escrow` smart contract emits structured events for every criti
                │
                ▼
 ┌──────────────────────────────────────────────┐
-│           POKA Anomaly Detection Engine      │
+│           KOFU Anomaly Detection Engine      │
 │  - Threshold Checker                         │
 │  - Heartbeat Watchdog                        │
 │  - Failure Counter                           │
@@ -87,7 +87,7 @@ The `soroban-poka-escrow` smart contract emits structured events for every criti
 
 ### Playbook A: Sentinel Key Compromise or Malfunction
 1. **Immediate Step**: Admin account calls contract update or revokes Sentinel role via admin key:
-   `PokaEscrowContract::update_sentinel(&env, &new_sentinel_address)`.
+   `KofuEscrowContract::update_sentinel(&env, &new_sentinel_address)`.
 2. **Isolation**: Stop the off-chain Sentinel Node process to prevent automated malicious transactions.
 3. **Audit**: Review all transactions signed within the preceding 6 hours against off-chain verification logs.
 4. **Resolution**: Deploy new rotated keypair funded via cold storage and resume Sentinel monitoring.

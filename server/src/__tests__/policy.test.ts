@@ -2,7 +2,7 @@ import { PolicyEngine, DEFAULT_POLICY } from '../services/ai/policy.js';
 import { Agreement } from '../types/shared.js';
 
 function runTests() {
-  console.log('--- RUNNING POKA POLICY ENGINE TESTS ---');
+  console.log('--- RUNNING KOFU POLICY ENGINE TESTS ---');
   const engine = new PolicyEngine();
 
   // Test 1: Validate creation limits
@@ -28,7 +28,7 @@ function runTests() {
   // Test 3: Validate fund release checks
   const mockAgreement: Agreement = {
     id: 'test-1',
-    humanReadableId: 'POKA-TEST',
+    humanReadableId: 'KOFU-TEST',
     initiator: 'Alice',
     counterparty: 'David',
     counterpartyType: 'human',

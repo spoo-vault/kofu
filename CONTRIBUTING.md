@@ -1,8 +1,8 @@
-# Contributing to POKA
+# Contributing to KOFU
 
-Thank you for your interest in contributing to **POKA — Autonomous Economic Agreement Protocol on Stellar & Soroban**! We welcome contributions from developers, researchers, and maintainers across the Stellar and AI communities.
+Thank you for your interest in contributing to **KOFU — Autonomous Economic Agreement Protocol on Stellar & Soroban**! We welcome contributions from developers, researchers, and maintainers across the Stellar and AI communities.
 
-POKA is participating in **Drips Wave** and the **Stellar Community Fund (SCF)** to reward open source maintainers and contributors.
+KOFU is participating in **Drips Wave** and the **Stellar Community Fund (SCF)** to reward open source maintainers and contributors.
 
 ---
 
@@ -18,8 +18,8 @@ POKA is participating in **Drips Wave** and the **Stellar Community Fund (SCF)**
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/spoo-vault/poka.git
-cd poka
+git clone https://github.com/spoo-vault/kofu.git
+cd kofu
 npm run install:all
 ```
 
@@ -27,7 +27,7 @@ npm run install:all
 ```bash
 npm run test:contracts
 # Or directly:
-cargo test --manifest-path contracts/soroban-poka-escrow/Cargo.toml
+cargo test --manifest-path contracts/soroban-kofu-escrow/Cargo.toml
 ```
 
 ### 3. Run Development Servers
@@ -35,7 +35,7 @@ cargo test --manifest-path contracts/soroban-poka-escrow/Cargo.toml
 # Terminal 1: Backend Server (Port 3005)
 npm run dev:server
 
-# Terminal 2: Frontend Client (Port 5173)
+# Terminal 2: Frontend Client (Port 5173 - Landing Page Preview)
 npm run dev:client
 ```
 
@@ -44,15 +44,15 @@ npm run dev:client
 ## 🌊 Drips Wave & Bounty Issues
 
 We maintain a curated set of maintainer tasks specifically designed for **Drips Wave**:
-- Check [docs/drips-wave-issues.md](file:///c:/Users/HP/bitsgo/poka/docs/drips-wave-issues.md) for current open tasks.
-- Ready-to-use issue templates are located in [docs/issues/](file:///c:/Users/HP/bitsgo/poka/docs/issues/).
+- Check [docs/drips-wave-issues.md](./docs/drips-wave-issues.md) for current open tasks.
+- Ready-to-use issue templates are located in [docs/issues/](./docs/issues/).
 - Tasks are categorized by difficulty (`good first issue`, `intermediate`, `advanced`) with corresponding Drips allocation weights.
 
 ---
 
 ## 📐 Coding Standards & Guidelines
 
-1. **Smart Contracts (`contracts/soroban-poka-escrow`)**:
+1. **Smart Contracts (`contracts/soroban-kofu-escrow`)**:
    - Must compile with `soroban-sdk` without warnings.
    - All public contract functions must enforce `require_auth` on caller addresses.
    - Every state-modifying function must emit structured events.

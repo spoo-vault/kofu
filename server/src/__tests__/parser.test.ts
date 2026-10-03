@@ -1,7 +1,7 @@
 import { AgreementParser } from '../services/ai/parser.js';
 
 function runTests() {
-  console.log('--- RUNNING POKA AI PARSER TESTS ---');
+  console.log('--- RUNNING KOFU AI PARSER TESTS ---');
 
   // Test 1: Standard USD/USDC prompt
   const p1 = AgreementParser.parseDeterministic('Pay David $50 when he delivers the website tomorrow.');

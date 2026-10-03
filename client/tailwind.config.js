@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        poka: {
+        kofu: {
           bg: '#08080A',
           card: '#0D0D11',
           surface: '#121217',

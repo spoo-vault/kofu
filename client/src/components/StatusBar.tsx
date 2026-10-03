@@ -1,5 +1,5 @@
 import React from 'react';
-import { SentinelStatus } from '@poka/shared';
+import { SentinelStatus } from '@kofu/shared';
 import { ShieldCheck, Activity, Cpu, Layers, ExternalLink } from 'lucide-react';
 
 interface StatusBarProps {

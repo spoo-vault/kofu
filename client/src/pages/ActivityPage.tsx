@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Agreement, Transaction } from '@poka/shared';
+import { Agreement, Transaction } from '@kofu/shared';
 import { api } from '../lib/api';
 import { Layers, ArrowRight, ExternalLink, ShieldCheck, CheckCircle2, Clock } from 'lucide-react';
 

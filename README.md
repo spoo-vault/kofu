@@ -1,8 +1,8 @@
-# POKA — Make Promises Programmable
+# KOFU — Make Promises Programmable
 
 > **Autonomous Economic Agreement Protocol on Stellar & Soroban**
 
-POKA turns natural-language promises and commitments into programmable economic agreements with autonomous monitoring and on-chain settlement on **Stellar** and **Soroban**.
+KOFU turns natural-language promises and commitments into programmable economic agreements with autonomous monitoring and on-chain settlement on **Stellar** and **Soroban**.
 
 ---
 
@@ -11,7 +11,7 @@ POKA turns natural-language promises and commitments into programmable economic 
 ```
 Natural language instruction
         ↓
-POKA understands intent & extracts terms (Gemini 2.0 / Heuristic fallback)
+KOFU understands intent & extracts terms (Gemini 2.0 / Heuristic fallback)
         ↓
 Structured agreement generated with Policy Guardrails
         ↓
@@ -19,7 +19,7 @@ User reviews / Autonomous agent negotiates terms (Counter-offers & SLAs)
         ↓
 Funds locked into Soroban Escrow (USDC / XLM / EURC)
         ↓
-POKA Sentinel autonomously monitors condition & off-chain telemetry
+KOFU Sentinel autonomously monitors condition & off-chain telemetry
         ↓
 Condition satisfied & cryptographically verified
         ↓
@@ -35,13 +35,13 @@ Verifiable on-chain transaction confirmed on StellarExpert
 ```
 USER / AI AGENT
      ↓
-POKA AGENT ORCHESTRATOR
+KOFU AGENT ORCHESTRATOR
      ↓
 TOOLS (parseAgreement, negotiate, depositEscrow, verifyCondition, releasePayment)
      ↓
 POLICY & PERMISSION LAYER (Limits, velocity caps, autonomous negotiation envelopes)
      ↓
-POKA SENTINEL (Autonomous watcher & verification engine)
+KOFU SENTINEL (Autonomous watcher & verification engine)
      ↓
 STELLAR SETTLEMENT LAYER (Soroban Rust Escrow Contract + Stellar SDK + Horizon / Soroban RPC)
 ```
@@ -51,9 +51,9 @@ STELLAR SETTLEMENT LAYER (Soroban Rust Escrow Contract + Stellar SDK + Horizon /
 ## 📦 Project Structure
 
 ```
-poka/
+kofu/
 ├── contracts/
-│   └── soroban-poka-escrow/      # Native Rust Soroban Smart Contract (soroban-sdk v22)
+│   └── soroban-kofu-escrow/      # Native Rust Soroban Smart Contract (soroban-sdk v22)
 │       ├── Cargo.toml
 │       └── src/
 │           ├── lib.rs            # Escrow logic: initialize, deposit, verify, settle, refund, dispute
@@ -86,7 +86,7 @@ poka/
 ```bash
 npm run test:contracts
 # Or directly:
-cargo test --manifest-path contracts/soroban-poka-escrow/Cargo.toml
+cargo test --manifest-path contracts/soroban-kofu-escrow/Cargo.toml
 ```
 
 ### 2. Start Backend Server
@@ -96,11 +96,16 @@ npm run dev
 # Starts on port 3005 with Horizon & Soroban RPC configured
 ```
 
-### 3. Start Frontend Client
+### 3. Start Frontend Client (Landing Page Preview)
 ```bash
 cd client
 npm run dev
 # Serves on http://localhost:5173 with Freighter wallet support
+```
+
+Or from the root directory:
+```bash
+npm run dev:client
 ```
 
 ---
@@ -117,7 +122,7 @@ STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
 STELLAR_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 STELLAR_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
 
-# POKA Soroban Contract
+# KOFU Soroban Contract
 STELLAR_CONTRACT_ID=CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
 STELLAR_ADMIN_PUBLIC_KEY=GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5
 
@@ -128,7 +133,7 @@ GEMINI_API_KEY=
 ---
 
 ## 🛡️ Stellar Community Fund (SCF) & Security Standards
-- **SCF Build Award Proposal**: [docs/scf-proposal.md](file:///c:/Users/HP/bitsgo/poka/docs/scf-proposal.md)
-- **STRIDE Threat Model**: [docs/threat-model.md](file:///c:/Users/HP/bitsgo/poka/docs/threat-model.md)
-- **On-Chain Monitoring Plan**: [docs/monitoring-plan.md](file:///c:/Users/HP/bitsgo/poka/docs/monitoring-plan.md)
-- **Repository**: [https://github.com/spoo-vault/poka](https://github.com/spoo-vault/poka)
+- **SCF Build Award Proposal**: [docs/scf-proposal.md](./docs/scf-proposal.md)
+- **STRIDE Threat Model**: [docs/threat-model.md](./docs/threat-model.md)
+- **On-Chain Monitoring Plan**: [docs/monitoring-plan.md](./docs/monitoring-plan.md)
+- **Repository**: [https://github.com/spoo-vault/kofu](https://github.com/spoo-vault/kofu)

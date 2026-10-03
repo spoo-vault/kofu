@@ -1,5 +1,5 @@
 name: 🐛 Bug Report
-description: Create a report to help us improve POKA on Stellar
+description: Create a report to help us improve KOFU on Stellar
 title: "[BUG]: "
 labels: ["bug", "triage"]
 body:

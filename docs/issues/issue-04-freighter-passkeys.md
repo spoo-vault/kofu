@@ -1,7 +1,7 @@
 # [DRIPS-04]: Freighter Passkey Session Keys for Agent Delegation
 
 ## Context & Problem
-Autonomous AI agents need to negotiate and lock micro-escrows without prompting the human user for a wallet signature on every micro-deal ($2 - $10). By implementing session keys and WebAuthn Passkey authorization, users can grant their delegated POKA agent a bounded spending allowance (e.g. $50 total or 24-hour validity) using Passkeys.
+Autonomous AI agents need to negotiate and lock micro-escrows without prompting the human user for a wallet signature on every micro-deal ($2 - $10). By implementing session keys and WebAuthn Passkey authorization, users can grant their delegated KOFU agent a bounded spending allowance (e.g. $50 total or 24-hour validity) using Passkeys.
 
 ## Scope & Target Files
 - Target files:

@@ -10,7 +10,7 @@
     "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
-      "@poka/shared": ["./src/types/shared.ts"]
+      "@kofu/shared": ["./src/types/shared.ts"]
     }
   },
   "include": ["src/**/*"]

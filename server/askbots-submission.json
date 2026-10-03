@@ -1,14 +1,14 @@
 {
-  "name": "POKA",
+  "name": "KOFU",
   "propertyType": "website",
-  "propertyUrl": "https://github.com/spoo-vault/poka",
+  "propertyUrl": "https://github.com/spoo-vault/kofu",
   "budget": 10,
   "skillFilters": [],
   "locationFilters": [],
   "questions": [
     {
       "id": "q1",
-      "text": "How well does POKA turn natural language promises into programmable economic agreements with Sentinel escrow monitoring on Stellar and Soroban?",
+      "text": "How well does KOFU turn natural language promises into programmable economic agreements with Sentinel escrow monitoring on Stellar and Soroban?",
       "type": "freeform"
     }
   ]

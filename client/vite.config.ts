@@ -8,7 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@poka/shared': path.resolve(__dirname, './src/types/shared.ts')
+      '@kofu/shared': path.resolve(__dirname, './src/types/shared.ts')
     }
   },
   server: {

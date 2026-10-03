@@ -5,8 +5,8 @@ Financial smart contracts must be resilient against edge cases: negative amounts
 
 ## Scope & Target Files
 - Target files:
-  - `contracts/soroban-poka-escrow/fuzz/` (Fuzzing harnesses)
-  - `contracts/soroban-poka-escrow/src/lib.rs` (Invariant annotations)
+  - `contracts/soroban-kofu-escrow/fuzz/` (Fuzzing harnesses)
+  - `contracts/soroban-kofu-escrow/src/lib.rs` (Invariant annotations)
 
 ## Acceptance Criteria
 - [ ] Implement `cargo-fuzz` harness with libFuzzer for `deposit`, `settle`, and `refund`.

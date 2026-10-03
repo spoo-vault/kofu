@@ -1,5 +1,5 @@
 import React from 'react';
-import { AutonomyLevel } from '@poka/shared';
+import { AutonomyLevel } from '@kofu/shared';
 import { Shield, Check, Lock, Sliders } from 'lucide-react';
 
 interface PolicyBadgeProps {

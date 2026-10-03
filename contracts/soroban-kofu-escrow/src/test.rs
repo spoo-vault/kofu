@@ -31,8 +31,8 @@ fn test_escrow_full_happy_path() {
     token_admin_client.mint(&buyer, &10_000_000); // 100 USDC in 7 decimals
 
     // Register escrow contract
-    let contract_id = env.register(PokaEscrowContract, ());
-    let client = PokaEscrowContractClient::new(&env, &contract_id);
+    let contract_id = env.register(KofuEscrowContract, ());
+    let client = KofuEscrowContractClient::new(&env, &contract_id);
 
     // Initialize
     client.initialize(&admin, &sentinel);
@@ -88,8 +88,8 @@ fn test_escrow_refund_after_timeout() {
     let (token, token_admin_client) = create_token_contract(&env, &token_admin);
     token_admin_client.mint(&buyer, &10_000_000);
 
-    let contract_id = env.register(PokaEscrowContract, ());
-    let client = PokaEscrowContractClient::new(&env, &contract_id);
+    let contract_id = env.register(KofuEscrowContract, ());
+    let client = KofuEscrowContractClient::new(&env, &contract_id);
     client.initialize(&admin, &sentinel);
 
     let agreement_id = Symbol::new(&env, "kofu_002");
@@ -126,8 +126,8 @@ fn test_escrow_sentinel_abort_refund() {
     let (token, token_admin_client) = create_token_contract(&env, &token_admin);
     token_admin_client.mint(&buyer, &5_000_000);
 
-    let contract_id = env.register(PokaEscrowContract, ());
-    let client = PokaEscrowContractClient::new(&env, &contract_id);
+    let contract_id = env.register(KofuEscrowContract, ());
+    let client = KofuEscrowContractClient::new(&env, &contract_id);
     client.initialize(&admin, &sentinel);
 
     let agreement_id = Symbol::new(&env, "kofu_003");

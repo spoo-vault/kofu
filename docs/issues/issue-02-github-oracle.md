@@ -1,7 +1,7 @@
 # [DRIPS-02]: GitHub Webhook Condition Verifier Service
 
 ## Context & Problem
-Currently, condition verification in POKA can be triggered via simulated API endpoints (`/satisfy`). To make POKA genuinely autonomous for developer bounties and open-source milestones, we need an automated oracle service that listens to GitHub webhooks (e.g. `pull_request.closed` where `merged == true` or `issues.closed`).
+Currently, condition verification in KOFU can be triggered via simulated API endpoints (`/satisfy`). To make KOFU genuinely autonomous for developer bounties and open-source milestones, we need an automated oracle service that listens to GitHub webhooks (e.g. `pull_request.closed` where `merged == true` or `issues.closed`).
 
 ## Scope & Target Files
 - Target files:

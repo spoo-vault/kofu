@@ -23,7 +23,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@poka/shared": ["../shared/types/index.ts"]
+      "@kofu/shared": ["../shared/types/index.ts"]
     }
   },
   "include": ["src", "../shared/types/**/*"],

@@ -53,11 +53,11 @@ pub enum DataKey {
 }
 
 #[contract]
-pub struct PokaEscrowContract;
+pub struct KofuEscrowContract;
 
 #[contractimpl]
-impl PokaEscrowContract {
-    /// Initialize the POKA Escrow contract with admin and sentinel addresses
+impl KofuEscrowContract {
+    /// Initialize the KOFU Escrow contract with admin and sentinel addresses
     pub fn initialize(env: Env, admin: Address, sentinel: Address) -> Result<(), EscrowError> {
         if env.storage().instance().has(&DataKey::Admin) {
             return Err(EscrowError::AlreadyInitialized);

@@ -1,5 +1,5 @@
 /**
- * POKA Drips Wave - GitHub Issues Bulk Creator
+ * KOFU Drips Wave - GitHub Issues Bulk Creator
  * Run: node scripts/create-github-issues.js
  */
 
@@ -31,7 +31,7 @@ const issueConfigs = [
   { file: 'issue-15-soroban-events-indexer.md', title: '[DRIPS-15]: Standalone Soroban Contract Event Indexer Daemon', labels: 'drips-wave,indexing,infrastructure,intermediate' },
 ];
 
-console.log('--- POKA DRIPS WAVE ISSUE GENERATOR ---');
+console.log('--- KOFU DRIPS WAVE ISSUE GENERATOR ---');
 console.log(`Found ${issueConfigs.length} configured maintainer tasks.\n`);
 
 for (const cfg of issueConfigs) {

@@ -1,7 +1,7 @@
 # [DRIPS-07]: Model Context Protocol (MCP) Server for AI Agents
 
 ## Context & Problem
-To enable AI agents running in external ecosystems (Claude Desktop, AutoGen, CrewAI, LangChain) to use POKA as their default payment and escrow tool, POKA should expose a standardized **Model Context Protocol (MCP)** server over standard I/O and Server-Sent Events (SSE).
+To enable AI agents running in external ecosystems (Claude Desktop, AutoGen, CrewAI, LangChain) to use KOFU as their default payment and escrow tool, KOFU should expose a standardized **Model Context Protocol (MCP)** server over standard I/O and Server-Sent Events (SSE).
 
 ## Scope & Target Files
 - Target files:

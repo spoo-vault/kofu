@@ -75,7 +75,7 @@ export interface AgreementEvent {
   type: string;
   message: string;
   timestamp: string;
-  actor: 'SYSTEM' | 'POKA SENTINEL' | 'BUYER_AGENT' | 'SELLER_AGENT' | 'INITIATOR' | 'COUNTERPARTY' | 'STELLAR_NETWORK';
+  actor: 'SYSTEM' | 'KOFU SENTINEL' | 'BUYER_AGENT' | 'SELLER_AGENT' | 'INITIATOR' | 'COUNTERPARTY' | 'STELLAR_NETWORK';
   metadata?: Record<string, any>;
 }
 

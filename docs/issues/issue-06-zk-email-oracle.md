@@ -6,12 +6,12 @@ Many freelance and real-world deliveries are verified via email notifications (e
 ## Scope & Target Files
 - Target files:
   - `server/src/services/sentinel/oracles/zk-email.ts` (ZK email proof verifier)
-  - `contracts/soroban-poka-escrow/src/lib.rs` (Proof hash verification)
+  - `contracts/soroban-kofu-escrow/src/lib.rs` (Proof hash verification)
 
 ## Acceptance Criteria
 - [ ] Implement DKIM signature parser and RSA-SHA256 header validator.
 - [ ] Verify regex pattern matching within email body without leaking raw content.
-- [ ] Export proof hash to `soroban-poka-escrow` via `mark_condition_met`.
+- [ ] Export proof hash to `soroban-kofu-escrow` via `mark_condition_met`.
 - [ ] Add sample fixture proving an invoice or delivery confirmation.
 
 ## Bounty Weight

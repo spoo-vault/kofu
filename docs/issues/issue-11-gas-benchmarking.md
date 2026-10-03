@@ -5,7 +5,7 @@ Soroban smart contracts incur fees based on CPU instructions, memory footprint, 
 
 ## Scope & Target Files
 - Target files:
-  - `contracts/soroban-poka-escrow/tests/benchmark.rs` (Gas benchmarking test)
+  - `contracts/soroban-kofu-escrow/tests/benchmark.rs` (Gas benchmarking test)
   - `scripts/benchmark-gas.sh` (Automated report generator)
 
 ## Acceptance Criteria

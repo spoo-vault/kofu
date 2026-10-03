@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Agreement, AgreementEvent, AgreementState } from '@poka/shared';
+import { Agreement, AgreementEvent, AgreementState } from '@kofu/shared';
 import { api } from '../lib/api';
 import { PolicyBadge } from '../components/PolicyBadge';
 import {
@@ -182,7 +182,7 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
               <div className="text-[10px] text-[#00FF66] mt-1">Authorized</div>
             </div>
 
-            {/* POKA ESCROW */}
+            {/* KOFU ESCROW */}
             <div className="relative py-2 md:py-0 flex flex-col items-center justify-center">
               <div className="flex items-center space-x-2 text-[#00FF66] mb-1">
                 <span className="text-xs font-bold tracking-wider">KOFU ESCROW</span>
