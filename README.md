@@ -1,8 +1,8 @@
 # POKA — Make Promises Programmable
 
-> **Autonomous Economic Agreement Agent for Celo "Agents at Work" Hackathon**
+> **Autonomous Economic Agreement Protocol on Stellar & Soroban**
 
-POKA turns natural-language promises and commitments into programmable economic agreements with autonomous monitoring and on-chain settlement on Celo.
+POKA turns natural-language promises and commitments into programmable economic agreements with autonomous monitoring and on-chain settlement on **Stellar** and **Soroban**.
 
 ---
 
@@ -11,21 +11,21 @@ POKA turns natural-language promises and commitments into programmable economic 
 ```
 Natural language instruction
         ↓
-POKA understands intent & extracts terms
+POKA understands intent & extracts terms (Gemini 2.0 / Heuristic fallback)
         ↓
-Structured agreement generated
+Structured agreement generated with Policy Guardrails
         ↓
-User reviews / Agent negotiates terms
+User reviews / Autonomous agent negotiates terms (Counter-offers & SLAs)
         ↓
-Funds locked into Celo Escrow
+Funds locked into Soroban Escrow (USDC / XLM / EURC)
         ↓
-POKA Sentinel autonomously monitors condition
+POKA Sentinel autonomously monitors condition & off-chain telemetry
         ↓
 Condition satisfied & cryptographically verified
         ↓
-Settlement executed on Celo Sepolia
+Settlement executed on Stellar Soroban Testnet / Mainnet
         ↓
-Attributed on-chain transaction confirmed
+Verifiable on-chain transaction confirmed on StellarExpert
 ```
 
 ---
@@ -33,17 +33,44 @@ Attributed on-chain transaction confirmed
 ## 🏗️ Architecture
 
 ```
-USER / AGENT
+USER / AI AGENT
      ↓
-POKA AGENT
+POKA AGENT ORCHESTRATOR
      ↓
-TOOLS (parseAgreement, negotiate, fundEscrow, verifyCondition, releasePayment)
+TOOLS (parseAgreement, negotiate, depositEscrow, verifyCondition, releasePayment)
      ↓
-POLICY & PERMISSION LAYER (Limits, caps, autonomous negotiation thresholds)
+POLICY & PERMISSION LAYER (Limits, velocity caps, autonomous negotiation envelopes)
      ↓
 POKA SENTINEL (Autonomous watcher & verification engine)
      ↓
-CELO SETTLEMENT LAYER (Celo Sepolia Testnet + Attribution Tag)
+STELLAR SETTLEMENT LAYER (Soroban Rust Escrow Contract + Stellar SDK + Horizon / Soroban RPC)
+```
+
+---
+
+## 📦 Project Structure
+
+```
+poka/
+├── contracts/
+│   └── soroban-poka-escrow/      # Native Rust Soroban Smart Contract (soroban-sdk v22)
+│       ├── Cargo.toml
+│       └── src/
+│           ├── lib.rs            # Escrow logic: initialize, deposit, verify, settle, refund, dispute
+│           └── test.rs           # Automated unit tests with Mock token clients
+├── server/                       # Node.js / Express backend with @stellar/stellar-sdk
+│   └── src/
+│       ├── services/
+│       │   ├── stellar/          # Horizon client, Soroban RPC, Keypairs, Faucet, Escrow
+│       │   ├── sentinel/         # Autonomous condition watcher & event ledger
+│       │   └── ai/               # Intent parser (Gemini 2.0), Policy engine, Agent negotiator
+│       └── routes/               # REST API for agreements, transactions, agents, and Stellar
+├── client/                       # React 18 + Vite + Tailwind CSS frontend
+│   └── src/
+│       ├── lib/                  # API client & Freighter wallet integration
+│       ├── components/           # Navbar, StatusBar, Policy badges
+│       └── pages/                # Command terminal, Agreement detail, Negotiation, Activity
+└── docs/                         # SCF Build Award proposal, Threat model, Monitoring plan, Issues
 ```
 
 ---
@@ -52,20 +79,28 @@ CELO SETTLEMENT LAYER (Celo Sepolia Testnet + Attribution Tag)
 
 ### Prerequisites
 - Node.js v20+
+- Rust & Cargo (with `wasm32-unknown-unknown` target)
 - npm
 
-### 1. Start Backend Server
+### 1. Test Smart Contracts
+```bash
+npm run test:contracts
+# Or directly:
+cargo test --manifest-path contracts/soroban-poka-escrow/Cargo.toml
+```
+
+### 2. Start Backend Server
 ```bash
 cd server
 npm run dev
-# Starts on port 3005 (configured to prevent conflicts)
+# Starts on port 3005 with Horizon & Soroban RPC configured
 ```
 
-### 2. Start Frontend Client
+### 3. Start Frontend Client
 ```bash
 cd client
 npm run dev
-# Serves on http://localhost:5173
+# Serves on http://localhost:5173 with Freighter wallet support
 ```
 
 ---
@@ -75,15 +110,25 @@ npm run dev
 ```env
 PORT=3005
 DEMO_MODE=true
-CELO_RPC_URL=https://forno.celo.org
-CELO_ATTRIBUTION_TAG=celo_fb00f20ea4e8
-CELO_WALLET_ADDRESS=0x26Fe17768374a18db647b4c9eDCDAcff4fA98367
-CELO_PRIVATE_KEY= # optional for real live mainnet broadcast
+
+# Stellar Network Settings
+STELLAR_NETWORK=testnet
+STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
+STELLAR_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
+STELLAR_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+
+# POKA Soroban Contract
+STELLAR_CONTRACT_ID=CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
+STELLAR_ADMIN_PUBLIC_KEY=GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5
+
+# AI Parser (Optional)
+GEMINI_API_KEY=
 ```
 
 ---
 
-## 🎨 Visual Design Direction
-- **Minimalist, Monochrome, Futuristic, Technical, Premium AI Infrastructure**
-- Deep dark palette (`#08080A`), off-white typography, thin borders, restrained acid-green accents (`#00FF66`).
-- Terminal telemetry and live Sentinel heartbeat activity.
+## 🛡️ Stellar Community Fund (SCF) & Security Standards
+- **SCF Build Award Proposal**: [docs/scf-proposal.md](file:///c:/Users/HP/bitsgo/poka/docs/scf-proposal.md)
+- **STRIDE Threat Model**: [docs/threat-model.md](file:///c:/Users/HP/bitsgo/poka/docs/threat-model.md)
+- **On-Chain Monitoring Plan**: [docs/monitoring-plan.md](file:///c:/Users/HP/bitsgo/poka/docs/monitoring-plan.md)
+- **Drips Wave Maintainer Issues**: [docs/drips-wave-issues.md](file:///c:/Users/HP/bitsgo/poka/docs/drips-wave-issues.md)
