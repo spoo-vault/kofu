@@ -87,7 +87,7 @@ export const NegotiationPage: React.FC<NegotiationPageProps> = ({
         counterparty: 'David (via Autonomous Agent)',
         counterpartyType: 'agent',
         amount: finalAmount,
-        currency: 'USD',
+        currency: 'USDC',
         condition: 'Website delivered within 24 hour SLA',
         deadline: '24 Hours',
         autonomyLevel: 'AUTONOMOUS',

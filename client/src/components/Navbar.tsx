@@ -1,5 +1,6 @@
-import React from 'react';
-import { Shield, Terminal, ArrowUpRight, Cpu } from 'lucide-react';
+import React, { useState } from 'react';
+import { Shield, Terminal, ArrowUpRight, Cpu, Wallet, CheckCircle2, Loader2 } from 'lucide-react';
+import { FreighterService } from '../lib/freighter';
 
 interface NavbarProps {
   currentTab: 'home' | 'agreements' | 'detail' | 'negotiation' | 'activity';
@@ -8,6 +9,32 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, selectedAgreementId }) => {
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState<boolean>(false);
+  const [walletError, setWalletError] = useState<string | null>(null);
+
+  const handleConnectWallet = async () => {
+    setConnecting(true);
+    setWalletError(null);
+    try {
+      const res = await FreighterService.connect();
+      if (res.connected && res.publicKey) {
+        setWalletAddress(res.publicKey);
+      } else if (res.error) {
+        setWalletError(res.error);
+        alert(res.error);
+      }
+    } catch (err: any) {
+      setWalletError(err?.message || 'Connection failed');
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const displayAddress = walletAddress
+    ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}`
+    : 'GBZH...4A5';
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#1E1E28] bg-[#08080A]/90 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -26,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, selected
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#00FF66] animate-pulse"></span>
               </div>
               <div className="text-[10px] font-mono tracking-widest text-[#848494] uppercase">
-                Make promises programmable
+                Autonomous Escrow on Stellar
               </div>
             </div>
           </button>
@@ -72,24 +99,39 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, selected
                   : 'text-[#848494] hover:text-[#F3F3F6] hover:bg-[#121217]'
               }`}
             >
-              Settlement & Ledger
+              Ledger & Settlement
             </button>
           </nav>
         </div>
 
-        {/* Right side: Celo Sepolia status & wallet */}
+        {/* Right side: Stellar Testnet status & Freighter wallet button */}
         <div className="flex items-center space-x-3">
           <div className="hidden sm:flex items-center space-x-2 px-2.5 py-1 rounded bg-[#0D0D11] border border-[#1E1E28] text-[11px] font-mono text-[#848494]">
             <span className="w-2 h-2 rounded-full bg-[#00FF66] shadow-[0_0_8px_#00FF66]"></span>
-            <span className="text-[#F3F3F6] font-medium">CELO SEPOLIA</span>
-            <span className="text-[#505060]">#11142222</span>
+            <span className="text-[#F3F3F6] font-medium">STELLAR TESTNET</span>
+            <span className="text-[#00FF66] text-[10px]">SOROBAN v22</span>
           </div>
 
-          <div className="flex items-center space-x-2 px-3 py-1.5 rounded bg-[#121217] border border-[#1E1E28] text-xs font-mono">
-            <div className="w-2 h-2 rounded-full bg-[#00FF66]/80"></div>
-            <span className="text-[#F3F3F6]">0x26F...8367</span>
-            <span className="text-[#848494] hidden md:inline">| Agent Active</span>
-          </div>
+          <button
+            onClick={handleConnectWallet}
+            disabled={connecting}
+            className="flex items-center space-x-2 px-3 py-1.5 rounded bg-[#121217] hover:bg-[#1A1A22] border border-[#1E1E28] hover:border-[#00FF66]/50 text-xs font-mono transition-all cursor-pointer"
+            title="Connect Freighter Stellar Wallet"
+          >
+            {connecting ? (
+              <Loader2 className="w-3 h-3 animate-spin text-[#00FF66]" />
+            ) : walletAddress ? (
+              <CheckCircle2 className="w-3 h-3 text-[#00FF66]" />
+            ) : (
+              <Wallet className="w-3 h-3 text-[#848494]" />
+            )}
+            <span className={walletAddress ? 'text-[#00FF66]' : 'text-[#F3F3F6]'}>
+              {displayAddress}
+            </span>
+            <span className="text-[#848494] hidden md:inline text-[10px]">
+              {walletAddress ? 'Freighter' : 'Demo Agent'}
+            </span>
+          </button>
         </div>
       </div>
     </header>

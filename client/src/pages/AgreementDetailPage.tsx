@@ -144,7 +144,7 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
 
         <div className="flex items-center space-x-2 text-[11px] text-[#848494]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#00FF66] animate-pulse"></span>
-          <span>SYNCED WITH CELO SEPOLIA</span>
+          <span>SYNCED WITH STELLAR TESTNET (SOROBAN)</span>
         </div>
       </div>
 
@@ -298,7 +298,7 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
               ) : (
                 <Layers className="w-3.5 h-3.5" />
               )}
-              <span>LOCK ${agreement.amount.toFixed(2)} INTO ESCROW (CELO)</span>
+              <span>LOCK {agreement.amount.toFixed(2)} {agreement.currency} (SOROBAN ESCROW)</span>
             </button>
           )}
 
@@ -328,25 +328,25 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
               ) : (
                 <Check className="w-3.5 h-3.5" />
               )}
-              <span>RELEASE PAYMENT TO {agreement.counterparty.toUpperCase()} ON CELO</span>
+              <span>RELEASE PAYMENT TO {agreement.counterparty.toUpperCase()} ON STELLAR</span>
             </button>
           )}
 
           {agreement.status === 'SETTLED' && (
             <div className="flex items-center space-x-3 text-xs text-[#00FF66] font-bold">
               <CheckCircle2 className="w-4 h-4" />
-              <span>AGREEMENT SETTLED &amp; CONFIRMED ON CELO NETWORK</span>
+              <span>AGREEMENT SETTLED &amp; CONFIRMED ON STELLAR SOROBAN</span>
             </div>
           )}
 
-          {agreement.celoTxHash && (
+          {agreement.stellarTxHash && (
             <a
-              href={`https://sepolia.celoscan.io/tx/${agreement.celoTxHash}`}
+              href={`https://stellar.expert/explorer/testnet/tx/${agreement.stellarTxHash}`}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-2 bg-[#121217] hover:bg-[#1E1E28] border border-[#1E1E28] text-xs text-[#848494] hover:text-[#F3F3F6] rounded flex items-center space-x-1.5 transition-colors"
+              className="px-3 py-2 bg-[#121217] hover:bg-[#1E1E28] border border-[#1E1E28] hover:border-[#00FF66]/40 text-xs text-[#848494] hover:text-[#00FF66] rounded flex items-center space-x-1.5 transition-colors"
             >
-              <span>View Celoscan Tx</span>
+              <span>View StellarExpert Tx</span>
               <ExternalLink className="w-3 h-3" />
             </a>
           )}

@@ -128,9 +128,9 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
                     </span>
                   </div>
 
-                  {a.celoTxHash && (
+                  {a.stellarTxHash && (
                     <div className="text-[11px] text-[#505060] font-mono pt-2 border-t border-[#1E1E28]/60 flex items-center justify-between">
-                      <span className="truncate max-w-sm">Celo Tx: {a.celoTxHash}</span>
+                      <span className="truncate max-w-sm">Stellar Tx: {a.stellarTxHash}</span>
                       <span className="text-[#00FF66] text-[10px]">Verified On-Chain</span>
                     </div>
                   )}
@@ -148,7 +148,7 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
             <div className="p-12 text-center bg-[#0D0D11] border border-[#1E1E28] rounded-lg space-y-2">
               <div className="text-sm text-[#EDEDED] font-semibold">No on-chain transactions yet</div>
               <p className="text-xs text-[#848494] max-w-md mx-auto">
-                All escrow deposits and settlement releases carrying the attribution tag <code className="text-[#00FF66]">celo_fb00f20ea4e8</code> will be recorded here.
+                All escrow deposits and settlement releases on Soroban contract <code className="text-[#00FF66]">CDLZ...YSC</code> will be recorded here.
               </p>
             </div>
           ) : (
@@ -164,7 +164,7 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
                     <span className="text-[#848494]">{tx.humanReadableId}</span>
                   </div>
                   <div className="text-xs font-bold text-[#EDEDED]">
-                    ${tx.amount} {tx.currency}
+                    {tx.amount} {tx.currency}
                   </div>
                 </div>
 
@@ -173,17 +173,19 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
                 </div>
 
                 <div className="flex items-center justify-between text-[10px] text-[#848494] pt-1 border-t border-[#1E1E28]">
-                  <span>Chain: {tx.chain}</span>
-                  <span className="text-[#848494] bg-[#121217] px-1.5 py-0.5 rounded border border-[#1E1E28]">
-                    Tag: {tx.attributionTag}
-                  </span>
+                  <span>Network: {tx.chain === 'STELLAR_MAINNET' ? 'Stellar Mainnet' : 'Stellar Testnet'}</span>
+                  {tx.stellarLedger && (
+                    <span className="text-[#848494] bg-[#121217] px-1.5 py-0.5 rounded border border-[#1E1E28]">
+                      Ledger: #{tx.stellarLedger}
+                    </span>
+                  )}
                   <a
-                    href={`https://sepolia.celoscan.io/tx/${tx.txHash}`}
+                    href={tx.explorerUrl || `https://stellar.expert/explorer/testnet/tx/${tx.txHash}`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-[#00FF66] hover:underline flex items-center space-x-1"
                   >
-                    <span>Celoscan</span>
+                    <span>StellarExpert</span>
                     <ExternalLink className="w-2.5 h-2.5" />
                   </a>
                 </div>

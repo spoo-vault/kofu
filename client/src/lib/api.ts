@@ -103,13 +103,32 @@ export const api = {
     return res.json();
   },
 
-  async simulateNegotiation(amount: number, condition: string, deadline: string): Promise<any> {
+  async simulateNegotiation(amount: number, condition: string, deadline: string, currency: string = 'USDC'): Promise<any> {
     const res = await fetch(`${API_BASE}/agents/simulate-negotiation`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, condition, deadline }),
+      body: JSON.stringify({ amount, condition, deadline, currency }),
     });
     if (!res.ok) throw new Error('Failed to simulate negotiation');
+    return res.json();
+  },
+
+  async getStellarStatus(): Promise<any> {
+    const res = await fetch(`${API_BASE}/stellar/status`);
+    if (!res.ok) throw new Error('Failed to fetch Stellar network status');
+    return res.json();
+  },
+
+  async requestFaucet(publicKey: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/stellar/faucet`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ publicKey }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Faucet request failed');
+    }
     return res.json();
   }
 };

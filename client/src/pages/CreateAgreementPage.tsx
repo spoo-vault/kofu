@@ -18,7 +18,8 @@ export const CreateAgreementPage: React.FC<CreateAgreementPageProps> = ({
   const [counterparty, setCounterparty] = useState(initialParsed.counterparty);
   const [counterpartyType, setCounterpartyType] = useState<'human' | 'agent'>(initialParsed.counterpartyType);
   const [amount, setAmount] = useState(initialParsed.amount.toString());
-  const [currency, setCurrency] = useState(initialParsed.currency);
+  const initialCurr = initialParsed.currency === 'XLM' ? 'XLM' : initialParsed.currency === 'EURC' ? 'EURC' : 'USDC';
+  const [currency, setCurrency] = useState<'USDC' | 'XLM' | 'EURC'>(initialCurr);
   const [condition, setCondition] = useState(initialParsed.condition);
   const [deadline, setDeadline] = useState(initialParsed.deadline);
   const [autonomyLevel, setAutonomyLevel] = useState<AutonomyLevel>(initialParsed.autonomyLevel || 'ASSISTED');
@@ -143,12 +144,12 @@ export const CreateAgreementPage: React.FC<CreateAgreementPageProps> = ({
                   />
                   <select
                     value={currency}
-                    onChange={(e) => setCurrency(e.target.value)}
+                    onChange={(e) => setCurrency(e.target.value as any)}
                     className="bg-[#08080A] border border-[#1E1E28] px-3 py-1.5 rounded text-xs text-[#848494] outline-none"
                   >
-                    <option value="USD">USD</option>
-                    <option value="USDC">USDC</option>
-                    <option value="CELO">CELO</option>
+                    <option value="USDC">USDC (Stellar)</option>
+                    <option value="XLM">XLM (Native)</option>
+                    <option value="EURC">EURC (Stellar)</option>
                   </select>
                 </div>
               ) : (

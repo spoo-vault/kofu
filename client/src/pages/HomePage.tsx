@@ -9,7 +9,7 @@ interface HomePageProps {
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationDemo }) => {
-  const [prompt, setPrompt] = useState('Pay David $50 when he delivers the website tomorrow.');
+  const [prompt, setPrompt] = useState('Pay David 50 USDC when he delivers the website tomorrow.');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +44,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationD
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#121217] border border-[#1E1E28] text-[11px] font-mono text-[#848494]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#00FF66]"></span>
           <span>POKA AUTONOMOUS PROTOCOL</span>
-          <span className="text-[#505060]">v0.1-ALPHA</span>
+          <span className="text-[#00FF66]">STELLAR &amp; SOROBAN</span>
+          <span className="text-[#505060]">v0.2</span>
         </div>
 
         {/* Central Large Prompt */}
@@ -64,7 +65,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationD
               type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. Pay David $50 when he delivers the website tomorrow."
+              placeholder="e.g. Pay David 50 USDC when he delivers the website tomorrow."
               className="w-full pl-9 pr-32 py-4 bg-[#0D0D11] border border-[#1E1E28] hover:border-[#2E2E3C] focus:border-[#00FF66] rounded text-[#EDEDED] placeholder-[#505060] font-mono text-sm sm:text-base outline-none transition-all shadow-2xl focus:ring-1 focus:ring-[#00FF66]/30"
               autoFocus
             />
@@ -101,10 +102,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationD
           
           <button
             type="button"
-            onClick={() => setPreset('Pay David $50 when he delivers the website tomorrow.')}
+            onClick={() => setPreset('Pay David 50 USDC when he delivers the website tomorrow.')}
             className="px-2.5 py-1 rounded bg-[#121217] hover:bg-[#1A1A22] border border-[#1E1E28] hover:border-[#2E2E3C] text-[#848494] hover:text-[#EDEDED] transition-all"
           >
-            [ Escrow Website ]
+            [ Escrow 50 USDC ]
           </button>
 
           <button
@@ -117,18 +118,18 @@ export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationD
 
           <button
             type="button"
-            onClick={() => setPreset('Send Research Agent 2 USDC once verified dataset is delivered.')}
+            onClick={() => setPreset('Send Research Agent 25 USDC once verified dataset is delivered.')}
             className="px-2.5 py-1 rounded bg-[#121217] hover:bg-[#1A1A22] border border-[#1E1E28] hover:border-[#2E2E3C] text-[#848494] hover:text-[#EDEDED] transition-all"
           >
-            [ Agent-to-Agent 2 USDC ]
+            [ Agent-to-Agent 25 USDC ]
           </button>
 
           <button
             type="button"
-            onClick={() => setPreset('Release 100 CELO to Auditor once smart contract verification passes.')}
+            onClick={() => setPreset('Release 100 XLM to Auditor once smart contract verification passes.')}
             className="px-2.5 py-1 rounded bg-[#121217] hover:bg-[#1A1A22] border border-[#1E1E28] hover:border-[#2E2E3C] text-[#848494] hover:text-[#EDEDED] transition-all"
           >
-            [ CELO Smart Contract ]
+            [ 100 XLM Audit Escrow ]
           </button>
         </div>
 
@@ -138,7 +139,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationD
           <span className="mx-2 text-[#848494]">→</span>
           <span>Sentinel monitoring</span>
           <span className="mx-2 text-[#848494]">→</span>
-          <span>Celo programmable settlement</span>
+          <span>Soroban autonomous settlement</span>
         </div>
       </div>
     </div>
