@@ -718,7 +718,14 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onLaunchApp, onTes
           </div>
           <div className="mt-2 sm:mt-0 flex items-center space-x-4">
             <span className="text-[#00FF66]">Stellar Testnet: Active</span>
-            <span>Contract: CDLZ...YSC</span>
+            <a
+              href="https://stellar.expert/explorer/testnet/contract/CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[#00FF66] transition-colors"
+            >
+              Contract: CAXN...SVJS
+            </a>
           </div>
         </div>
       </footer>

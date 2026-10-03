@@ -19,7 +19,7 @@ const INITIAL_DEMO_AGREEMENTS: Agreement[] = [
     deadline: 'Tomorrow 5:00 PM UTC',
     status: 'AGREED',
     autonomyLevel: 'ASSISTED',
-    sorobanContractId: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
+    sorobanContractId: 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS',
     escrowFunded: true,
     conditionSatisfied: false,
     stellarTxHash: 'a89c3b47f29e1208945cf43872931a0e834927b561cda08912ef09843615bcde',
@@ -38,7 +38,7 @@ const INITIAL_DEMO_AGREEMENTS: Agreement[] = [
     deadline: '2026-10-10',
     status: 'SETTLED',
     autonomyLevel: 'AUTONOMOUS',
-    sorobanContractId: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
+    sorobanContractId: 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS',
     escrowFunded: true,
     conditionSatisfied: true,
     stellarTxHash: 'f451a9238bc4081efb984531204895ca7238bdf89421ea9834125b0981e2894a',
@@ -182,7 +182,7 @@ export const api = {
       deadline: data.deadline || 'Tomorrow',
       status: (data.startState as any) || 'AGREED',
       autonomyLevel: data.autonomyLevel || 'ASSISTED',
-      sorobanContractId: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
+      sorobanContractId: 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS',
       escrowFunded: false,
       conditionSatisfied: false,
       createdAt: new Date().toISOString(),
@@ -376,7 +376,7 @@ export const api = {
       status: 'SYNCED',
       network: 'STELLAR_TESTNET',
       currentLedger: 1249015,
-      sorobanContractId: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
+      sorobanContractId: 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS',
     };
   },
 
@@ -391,7 +391,7 @@ export const api = {
     return [
       { id: 'agent-buyer', name: 'KOFU Buyer Agent', role: 'buyer_agent', address: '0x71C...49b', status: 'ACTIVE' },
       { id: 'agent-seller', name: 'Contractor Agent', role: 'seller_agent', address: '0x489...11A', status: 'ACTIVE' },
-      { id: 'agent-sentinel', name: 'KOFU Sentinel', role: 'sentinel', address: 'CDLZ...YSC', status: 'LISTENING' }
+      { id: 'agent-sentinel', name: 'KOFU Sentinel', role: 'sentinel', address: 'CAXN...SVJS', status: 'LISTENING' }
     ];
   },
 
@@ -452,8 +452,8 @@ export const api = {
       network: 'testnet',
       horizonUrl: 'https://horizon-testnet.stellar.org',
       sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
-      contractId: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
-      adminPublicKey: 'GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5'
+      contractId: 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS',
+      adminPublicKey: 'GCTCRCWCZ63GL6E3B3SWXHGIHQ2JGSMHZTUXIFB34Z7OWJHW6GDLNSQB'
     };
   },
 

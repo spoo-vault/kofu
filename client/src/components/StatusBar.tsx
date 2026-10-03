@@ -11,7 +11,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ status }) => {
   const totalEscrow = status?.totalInEscrow ?? 3450;
   const syncStatus = status?.status ?? 'SYNCED';
   const currency = status?.currency ?? 'USDC';
-  const contractId = status?.sorobanContractId ?? 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC';
+  const contractId = status?.sorobanContractId ?? 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS';
   const shortContract = `${contractId.substring(0, 4)}...${contractId.substring(contractId.length - 4)}`;
 
   return (

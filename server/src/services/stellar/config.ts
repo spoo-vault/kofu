@@ -25,8 +25,8 @@ export const stellarConfig: StellarConfig = {
     ? (process.env.STELLAR_SOROBAN_RPC_URL || 'https://soroban-rpc.mainnet.stellar.org')
     : (process.env.STELLAR_SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org'),
   networkPassphrase: isMainnet ? Networks.PUBLIC : Networks.TESTNET,
-  contractId: process.env.STELLAR_CONTRACT_ID || 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
-  adminPublicKey: process.env.STELLAR_ADMIN_PUBLIC_KEY || 'GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5',
+  contractId: process.env.STELLAR_CONTRACT_ID || 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS',
+  adminPublicKey: process.env.STELLAR_ADMIN_PUBLIC_KEY || 'GCTCRCWCZ63GL6E3B3SWXHGIHQ2JGSMHZTUXIFB34Z7OWJHW6GDLNSQB',
   adminSecretKey: process.env.STELLAR_ADMIN_SECRET_KEY,
   usdcAssetCode: 'USDC',
   // Official Circle USDC on Stellar Testnet and Mainnet

@@ -70,7 +70,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
 
         <a
-          href="https://stellar.expert/explorer/testnet/contract/CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
+          href="https://stellar.expert/explorer/testnet/contract/CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS"
           target="_blank"
           rel="noopener noreferrer"
           className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded bg-[#121217] hover:bg-[#1A1A22] border border-[#1E1E28] text-[11px] text-[#848494] hover:text-[#00FF66] transition-colors"

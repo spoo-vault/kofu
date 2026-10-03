@@ -148,7 +148,7 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
             <div className="p-12 text-center bg-[#0D0D11] border border-[#1E1E28] rounded-lg space-y-2">
               <div className="text-sm text-[#EDEDED] font-semibold">No on-chain transactions yet</div>
               <p className="text-xs text-[#848494] max-w-md mx-auto">
-                All escrow deposits and settlement releases on Soroban contract <code className="text-[#00FF66]">CDLZ...YSC</code> will be recorded here.
+                All escrow deposits and settlement releases on Soroban contract <code className="text-[#00FF66]">CAXN...SVJS</code> will be recorded here.
               </p>
             </div>
           ) : (
