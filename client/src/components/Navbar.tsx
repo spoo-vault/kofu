@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, Terminal, ArrowRight, Cpu, Wallet, CheckCircle2, Loader2, ArrowLeft, ExternalLink, Code2 } from 'lucide-react';
-import { FreighterService } from '../lib/freighter';
+import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
+import { WalletModal } from './WalletModal';
 
 interface NavbarProps {
   currentTab: 'landing' | 'home' | 'agreements' | 'create' | 'detail' | 'negotiation' | 'activity';
@@ -10,32 +11,22 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [connecting, setConnecting] = useState<boolean>(false);
-  const [walletError, setWalletError] = useState<string | null>(null);
+  const [walletId, setWalletId] = useState<SupportedWalletId | null>(null);
+  const [walletModalOpen, setWalletModalOpen] = useState<boolean>(false);
 
   const isLandingMode = currentTab === 'landing';
 
-  const handleConnectWallet = async () => {
-    setConnecting(true);
-    setWalletError(null);
-    try {
-      const res = await FreighterService.connect();
-      if (res.connected && res.publicKey) {
-        setWalletAddress(res.publicKey);
-      } else if (res.error) {
-        setWalletError(res.error);
-        alert(res.error);
-      }
-    } catch (err: any) {
-      setWalletError(err?.message || 'Connection failed');
-    } finally {
-      setConnecting(false);
-    }
-  };
+  useEffect(() => {
+    const unsubscribe = stellarWalletService.subscribe((address, wid) => {
+      setWalletAddress(address);
+      setWalletId(wid);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const displayAddress = walletAddress
     ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}`
-    : 'GBZH...4A5';
+    : 'Connect Wallet';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#1E1E28] bg-[#08080A]/95 backdrop-blur-md">
@@ -185,14 +176,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
           ) : (
             /* Wallet button in app */
             <button
-              onClick={handleConnectWallet}
-              disabled={connecting}
+              onClick={() => setWalletModalOpen(true)}
               className="flex items-center space-x-2 px-3 py-1.5 rounded bg-[#121217] hover:bg-[#1A1A22] border border-[#1E1E28] hover:border-[#00FF66]/50 text-xs font-mono transition-all cursor-pointer"
-              title="Connect Freighter Stellar Wallet"
+              title="Connect Stellar Multi-Wallet (LOBSTR, Freighter, Albedo, xBull)"
             >
-              {connecting ? (
-                <Loader2 className="w-3 h-3 animate-spin text-[#00FF66]" />
-              ) : walletAddress ? (
+              {walletAddress ? (
                 <CheckCircle2 className="w-3 h-3 text-[#00FF66]" />
               ) : (
                 <Wallet className="w-3 h-3 text-[#848494]" />
@@ -200,13 +188,20 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
               <span className={walletAddress ? 'text-[#00FF66]' : 'text-[#F3F3F6]'}>
                 {displayAddress}
               </span>
-              <span className="text-[#848494] hidden md:inline text-[10px]">
-                {walletAddress ? 'Freighter' : 'Demo Agent'}
+              <span className="text-[#848494] hidden md:inline text-[10px] capitalize">
+                {walletAddress ? (walletId || 'Stellar') : 'Signers'}
               </span>
             </button>
           )}
         </div>
       </div>
+
+      <WalletModal
+        isOpen={walletModalOpen}
+        onClose={() => setWalletModalOpen(false)}
+        activeAddress={walletAddress}
+        activeWalletId={walletId}
+      />
     </header>
   );
 };

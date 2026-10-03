@@ -18,7 +18,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Agreement } from '@kofu/shared';
-import { FreighterService } from '../lib/freighter';
+import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
+import { WalletModal } from './WalletModal';
 import { api } from '../lib/api';
 
 interface AppSidebarProps {
@@ -40,7 +41,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 }) => {
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [connecting, setConnecting] = useState<boolean>(false);
+  const [walletId, setWalletId] = useState<SupportedWalletId | null>(null);
+  const [walletModalOpen, setWalletModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const loadAgreements = async () => {
@@ -54,25 +56,17 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     loadAgreements();
   }, [currentTab]);
 
-  const handleConnectWallet = async () => {
-    setConnecting(true);
-    try {
-      const res = await FreighterService.connect();
-      if (res.connected && res.publicKey) {
-        setWalletAddress(res.publicKey);
-      } else if (res.error) {
-        alert(res.error);
-      }
-    } catch (err: any) {
-      alert(err?.message || 'Connection failed');
-    } finally {
-      setConnecting(false);
-    }
-  };
+  useEffect(() => {
+    const unsubscribe = stellarWalletService.subscribe((address, wid) => {
+      setWalletAddress(address);
+      setWalletId(wid);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const displayAddress = walletAddress
     ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}`
-    : 'GBZH...4A5';
+    : 'Connect Wallet';
 
   return (
     <aside
@@ -243,16 +237,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
         {/* Wallet Account Box */}
         <button
-          onClick={handleConnectWallet}
-          disabled={connecting}
-          className={`w-full flex items-center space-x-2 px-2.5 py-2 rounded-lg bg-[#121217] hover:bg-[#16161D] border border-[#1E1E28] text-xs font-mono transition-all text-left ${
+          onClick={() => setWalletModalOpen(true)}
+          className={`w-full flex items-center space-x-2 px-2.5 py-2 rounded-lg bg-[#121217] hover:bg-[#16161D] border border-[#1E1E28] hover:border-[#00FF66]/40 text-xs font-mono transition-all text-left cursor-pointer ${
             collapsed ? 'justify-center px-0' : ''
           }`}
-          title="Freighter Stellar Wallet"
+          title="Stellar Wallets (LOBSTR, Freighter, Albedo, xBull)"
         >
-          {connecting ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#00FF66] shrink-0" />
-          ) : walletAddress ? (
+          {walletAddress ? (
             <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF66] shrink-0" />
           ) : (
             <Wallet className="w-3.5 h-3.5 text-[#848494] shrink-0" />
@@ -263,13 +254,21 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               <div className={walletAddress ? 'text-[#00FF66] font-medium' : 'text-[#F3F3F6]'}>
                 {displayAddress}
               </div>
-              <div className="text-[9px] text-[#505060]">
-                {walletAddress ? 'Freighter Connected' : 'Click to Connect'}
+              <div className="text-[9px] text-[#505060] capitalize">
+                {walletAddress ? `${walletId || 'Stellar'} Connected` : 'Connect Multi-Wallet'}
               </div>
             </div>
           )}
         </button>
       </div>
+
+      {/* Multi-Wallet Connection Modal */}
+      <WalletModal
+        isOpen={walletModalOpen}
+        onClose={() => setWalletModalOpen(false)}
+        activeAddress={walletAddress}
+        activeWalletId={walletId}
+      />
     </aside>
   );
 };

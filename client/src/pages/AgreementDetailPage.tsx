@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Agreement, AgreementEvent, AgreementState } from '@kofu/shared';
 import { api } from '../lib/api';
 import { PolicyBadge } from '../components/PolicyBadge';
+import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
+import { WalletModal } from '../components/WalletModal';
 import {
   ArrowLeft,
   Shield,
@@ -16,6 +18,7 @@ import {
   Sparkles,
   ArrowDown,
   Loader2,
+  Wallet,
 } from 'lucide-react';
 
 interface AgreementDetailPageProps {
@@ -44,6 +47,17 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [walletId, setWalletId] = useState<SupportedWalletId | null>(null);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+
+  useEffect(() => {
+    const unsub = stellarWalletService.subscribe((addr, wid) => {
+      setWalletAddress(addr);
+      setWalletId(wid);
+    });
+    return () => unsub();
+  }, []);
 
   const fetchDetails = async () => {
     try {
@@ -65,6 +79,13 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
 
   const handleFundEscrow = async () => {
     if (!agreement) return;
+
+    if (!stellarWalletService.isConnected()) {
+      setWalletModalOpen(true);
+      setError('Please connect a Stellar wallet (Freighter, LOBSTR, Albedo, xBull, or Testnet Agent) to lock escrow.');
+      return;
+    }
+
     setActionLoading(true);
     setError(null);
     try {
@@ -408,6 +429,14 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
 
       {/* Autonomy & Security Layer */}
       <PolicyBadge level={agreement.autonomyLevel} interactive={false} />
+
+      {/* Multi-Wallet Modal */}
+      <WalletModal
+        isOpen={walletModalOpen}
+        onClose={() => setWalletModalOpen(false)}
+        activeAddress={walletAddress}
+        activeWalletId={walletId}
+      />
     </div>
   );
 };

@@ -64,7 +64,7 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
                 : 'text-[#848494] hover:text-[#F3F3F6]'
             }`}
           >
-            Celo Transactions ({transactions.length})
+            Stellar Transactions ({transactions.length})
           </button>
         </div>
       </div>
@@ -76,7 +76,7 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
             <div className="p-12 text-center bg-[#0D0D11] border border-[#1E1E28] rounded-lg space-y-2">
               <div className="text-sm text-[#EDEDED] font-semibold">No active agreements recorded</div>
               <p className="text-xs text-[#848494] max-w-md mx-auto">
-                Create your first programmable economic agreement from the Command Center to lock an escrow on Celo.
+                Create your first programmable economic agreement from the Command Center to lock an escrow on Stellar Soroban.
               </p>
             </div>
           ) : (

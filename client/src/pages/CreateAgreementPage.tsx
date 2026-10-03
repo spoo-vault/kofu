@@ -202,7 +202,7 @@ export const CreateAgreementPage: React.FC<CreateAgreementPageProps> = ({
             <span className="text-xs text-[#848494] uppercase tracking-wider">Escrow Required</span>
             <div className="sm:col-span-2 flex items-center space-x-2">
               <span className="text-[#00FF66] font-bold">${numAmount.toFixed(2)}</span>
-              <span className="text-[11px] text-[#848494]">(To be locked on Celo Sepolia)</span>
+              <span className="text-[11px] text-[#848494]">(To be locked on Stellar Testnet Soroban)</span>
             </div>
           </div>
         </div>
