@@ -15,8 +15,8 @@ export type AgreementState =
 export type AutonomyLevel = 'MANUAL' | 'ASSISTED' | 'AUTONOMOUS';
 
 export interface PolicyPermissions {
-  maxTransaction: number;
-  maxNegotiation: number;
+  maxTransaction: number; // e.g. 100 USDC / 500 XLM
+  maxNegotiation: number; // e.g. 75 USDC
   canRequestExtension: boolean;
   canNegotiate: boolean;
   canReleaseFunds: boolean;
@@ -26,7 +26,7 @@ export interface ParsedAgreementInput {
   counterparty: string;
   counterpartyType: 'human' | 'agent';
   amount: number;
-  currency: string;
+  currency: 'USDC' | 'XLM' | 'EURC' | 'USD';
   condition: string;
   deadline: string;
   escrowRequired: boolean;
@@ -38,19 +38,20 @@ export interface ParsedAgreementInput {
 export interface Agreement {
   id: string;
   humanReadableId: string; // e.g. POKA-001
-  initiator: string;
-  counterparty: string;
+  initiator: string; // Stellar public key (G...)
+  counterparty: string; // Stellar public key or agent name
   counterpartyType: 'human' | 'agent';
   amount: number;
-  currency: string;
+  currency: 'USDC' | 'XLM' | 'EURC';
   condition: string;
   deadline: string;
   status: AgreementState;
   autonomyLevel: AutonomyLevel;
-  escrowAddress?: string;
+  sorobanContractId?: string; // Soroban contract address (C...)
   escrowFunded: boolean;
   conditionSatisfied: boolean;
-  celoTxHash?: string;
+  stellarTxHash?: string; // Stellar 64-char transaction hash
+  stellarLedger?: number;
   negotiationHistory?: NegotiationMessage[];
   createdAt: string;
   updatedAt: string;
@@ -62,6 +63,7 @@ export interface NegotiationMessage {
   senderRole: 'buyer_agent' | 'seller_agent' | 'human_initiator' | 'human_counterparty';
   content: string;
   proposedAmount?: number;
+  currency?: string;
   timestamp: string;
   isOffer?: boolean;
   isAccepted?: boolean;
@@ -73,7 +75,7 @@ export interface AgreementEvent {
   type: string;
   message: string;
   timestamp: string;
-  actor: 'SYSTEM' | 'POKA SENTINEL' | 'BUYER_AGENT' | 'SELLER_AGENT' | 'INITIATOR' | 'COUNTERPARTY' | 'CELO_NETWORK';
+  actor: 'SYSTEM' | 'POKA SENTINEL' | 'BUYER_AGENT' | 'SELLER_AGENT' | 'INITIATOR' | 'COUNTERPARTY' | 'STELLAR_NETWORK';
   metadata?: Record<string, any>;
 }
 
@@ -81,22 +83,38 @@ export interface Transaction {
   id: string;
   agreementId: string;
   humanReadableId: string;
-  txHash: string;
-  chain: string;
+  txHash: string; // Stellar transaction hash
+  chain: 'STELLAR_TESTNET' | 'STELLAR_MAINNET';
+  networkPassphrase?: string;
   amount: number;
   currency: string;
   status: 'PENDING' | 'CONFIRMED' | 'FAILED';
   type: 'ESCROW_DEPOSIT' | 'SETTLEMENT_RELEASE' | 'REFUND';
-  from: string;
-  to: string;
+  from: string; // Stellar address (G...)
+  to: string; // Stellar address or Soroban contract (C...)
   createdAt: string;
-  attributionTag?: string;
-  blockNumber?: number;
+  stellarLedger?: number;
+  sorobanContractId?: string;
+  explorerUrl?: string;
 }
 
 export interface SentinelStatus {
   activeSentinelsCount: number;
   totalInEscrow: number;
+  currency: string;
   status: 'SYNCED' | 'MONITORING' | 'SETTLING';
-  network: 'CELO_SEPOLIA' | 'CELO_MAINNET' | 'DEMO_SANDBOX';
+  network: 'STELLAR_TESTNET' | 'STELLAR_MAINNET' | 'DEMO_SANDBOX';
+  currentLedger?: number;
+  sorobanContractId?: string;
+}
+
+export interface StellarNetworkInfo {
+  network: 'testnet' | 'public';
+  horizonUrl: string;
+  sorobanRpcUrl: string;
+  passphrase: string;
+  contractId: string;
+  adminPublicKey: string;
+  usdcAssetCode: string;
+  usdcIssuer: string;
 }

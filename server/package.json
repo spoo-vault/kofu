@@ -9,12 +9,11 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@celo/attribution-tags": "^0.3.0",
+    "@stellar/stellar-sdk": "^17.2.1",
     "askbots": "^0.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "viem": "^2.23.0"
+    "express": "^4.21.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
