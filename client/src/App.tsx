@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ParsedAgreementInput, Agreement, SentinelStatus } from '@kofu/shared';
 import { Navbar } from './components/Navbar';
+import { AppSidebar } from './components/AppSidebar';
+import { AppHeader } from './components/AppHeader';
 import { StatusBar } from './components/StatusBar';
 import { MarketingPage } from './pages/MarketingPage';
 import { HomePage } from './pages/HomePage';
@@ -15,13 +17,14 @@ export function App() {
   const [parsedData, setParsedData] = useState<ParsedAgreementInput | null>(null);
   const [selectedAgreementId, setSelectedAgreementId] = useState<string | null>(null);
   const [sentinelStatus, setSentinelStatus] = useState<SentinelStatus | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
   // Poll Sentinel status periodically
   const fetchStatus = async () => {
     try {
       const status = await api.getSentinelStatus();
       setSentinelStatus(status);
-    } catch (e) {
+    } catch {
       // Handled silently
     }
   };
@@ -58,72 +61,96 @@ export function App() {
     setCurrentTab('detail');
   };
 
+  const handleNavigate = (tab: 'landing' | 'home' | 'agreements' | 'negotiation' | 'activity') => {
+    if (tab === 'agreements') {
+      setCurrentTab('activity');
+    } else {
+      setCurrentTab(tab);
+    }
+  };
+
+  // Case 1: Landing Page Mode (Public Marketing Website)
+  if (currentTab === 'landing') {
+    return (
+      <div className="min-h-screen bg-[#08080A] text-[#F3F3F6] selection:bg-[#00FF66]/20 selection:text-[#00FF66]">
+        <Navbar
+          currentTab="landing"
+          onNavigate={handleNavigate}
+        />
+        <MarketingPage
+          onLaunchApp={() => setCurrentTab('home')}
+          onTestPrompt={handleTestPrompt}
+        />
+      </div>
+    );
+  }
+
+  // Case 2: Product App Mode (ChatGPT-Style Side Navigation)
   return (
-    <div className="min-h-screen bg-[#08080A] text-[#F3F3F6] selection:bg-[#00FF66]/20 selection:text-[#00FF66] pb-16">
-      {/* Top Navigation Bar */}
-      <Navbar
+    <div className="flex h-screen bg-[#08080A] text-[#F3F3F6] overflow-hidden selection:bg-[#00FF66]/20 selection:text-[#00FF66]">
+      {/* Collapsible Left Side Nav */}
+      <AppSidebar
         currentTab={currentTab}
-        onNavigate={(tab) => {
-          if (tab === 'agreements') {
-            setCurrentTab('activity');
-          } else {
-            setCurrentTab(tab);
-          }
-        }}
-        selectedAgreementId={selectedAgreementId}
+        onNavigate={handleNavigate}
+        onSelectAgreement={handleSelectAgreement}
+        onNewAgreement={() => setCurrentTab('home')}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
 
-      {/* Main Content Area */}
-      <main className="animate-fade-in">
-        {currentTab === 'landing' && (
-          <MarketingPage
-            onLaunchApp={() => setCurrentTab('home')}
-            onTestPrompt={handleTestPrompt}
-          />
-        )}
+      {/* Main Workspace Canvas */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#08080A]">
+        {/* Workspace Top Header */}
+        <AppHeader
+          currentTab={currentTab}
+          selectedAgreementId={selectedAgreementId}
+          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+          sentinelStatus={sentinelStatus}
+        />
 
-        {currentTab === 'home' && (
-          <HomePage
-            onParsed={handleParsed}
-            onOpenNegotiationDemo={() => setCurrentTab('negotiation')}
-          />
-        )}
+        {/* Scrollable Workspace Pages */}
+        <main className="flex-1 overflow-y-auto pb-14">
+          {currentTab === 'home' && (
+            <HomePage
+              onParsed={handleParsed}
+              onOpenNegotiationDemo={() => setCurrentTab('negotiation')}
+            />
+          )}
 
-        {currentTab === 'create' && parsedData && (
-          <CreateAgreementPage
-            initialParsed={parsedData}
-            onBack={() => setCurrentTab('home')}
-            onAgreementCreated={handleAgreementCreated}
-          />
-        )}
+          {currentTab === 'create' && parsedData && (
+            <CreateAgreementPage
+              initialParsed={parsedData}
+              onBack={() => setCurrentTab('home')}
+              onAgreementCreated={handleAgreementCreated}
+            />
+          )}
 
-        {currentTab === 'detail' && selectedAgreementId && (
-          <AgreementDetailPage
-            agreementId={selectedAgreementId}
-            onBack={() => setCurrentTab('activity')}
-            onOpenNegotiation={() => {
-              setCurrentTab('negotiation');
-            }}
-          />
-        )}
+          {currentTab === 'detail' && selectedAgreementId && (
+            <AgreementDetailPage
+              agreementId={selectedAgreementId}
+              onBack={() => setCurrentTab('activity')}
+              onOpenNegotiation={() => {
+                setCurrentTab('negotiation');
+              }}
+            />
+          )}
 
-        {currentTab === 'negotiation' && (
-          <NegotiationPage
-            onAgreementCreated={handleAgreementCreated}
-          />
-        )}
+          {currentTab === 'negotiation' && (
+            <NegotiationPage
+              onAgreementCreated={handleAgreementCreated}
+            />
+          )}
 
-        {currentTab === 'activity' && (
-          <ActivityPage
-            onSelectAgreement={handleSelectAgreement}
-          />
-        )}
-      </main>
+          {currentTab === 'activity' && (
+            <ActivityPage
+              onSelectAgreement={handleSelectAgreement}
+            />
+          )}
+        </main>
 
-      {/* Persistent Bottom Status Bar (Shown in app mode) */}
-      {currentTab !== 'landing' && (
+        {/* Persistent Workspace Status Bar */}
         <StatusBar status={sentinelStatus} />
-      )}
+      </div>
     </div>
   );
 }
