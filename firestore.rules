@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read and write for KOFU agreements and events on Testnet
+    match /agreements/{agreementId} {
+      allow read, write: if true;
+    }
+    match /agreement_events/{eventId} {
+      allow read, write: if true;
+    }
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

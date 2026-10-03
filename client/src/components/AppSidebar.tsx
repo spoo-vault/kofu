@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Agreement } from '@kofu/shared';
 import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
+import { FirestoreService } from '../lib/firestoreService';
 import { WalletModal } from './WalletModal';
 import { api } from '../lib/api';
 
@@ -49,15 +50,27 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const [walletModalOpen, setWalletModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
+    // 1. Listen to live real-time Firestore updates
+    const unsubFirestore = FirestoreService.subscribeAgreements((liveList) => {
+      if (liveList && liveList.length > 0) {
+        setAgreements(liveList);
+      }
+    });
+
+    // 2. Fetch initial list as fallback
     const loadAgreements = async () => {
       try {
         const list = await api.getAgreements();
-        setAgreements(list);
+        setAgreements((prev) => (prev.length > 0 ? prev : list));
       } catch {
         // Fallback handled in api
       }
     };
     loadAgreements();
+
+    return () => {
+      if (unsubFirestore) unsubFirestore();
+    };
   }, [currentTab]);
 
   useEffect(() => {

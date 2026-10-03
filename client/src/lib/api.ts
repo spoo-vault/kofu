@@ -1,4 +1,5 @@
 import { Agreement, AgreementEvent, Transaction, SentinelStatus, ParsedAgreementInput } from '@kofu/shared';
+import { FirestoreService } from './firestoreService';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -190,6 +191,18 @@ export const api = {
 
     list.unshift(newAgr);
     saveStoredAgreements(list);
+
+    // Sync to Cloud Firestore in background
+    FirestoreService.saveAgreement(newAgr);
+    FirestoreService.logEvent({
+      id: `ev-${Date.now()}`,
+      agreementId: newAgr.id,
+      type: 'AGREEMENT_INITIALIZED',
+      message: `KOFU escrow initialized: ${newAgr.amount} ${newAgr.currency} for ${newAgr.counterparty}.`,
+      timestamp: newAgr.createdAt,
+      actor: 'INITIATOR'
+    });
+
     return newAgr;
   },
 
@@ -207,6 +220,7 @@ export const api = {
       list[idx].status = 'AGREED';
       list[idx].updatedAt = new Date().toISOString();
       saveStoredAgreements(list);
+      FirestoreService.saveAgreement(list[idx]);
     }
     return {
       agreement: list[idx] || list[0],
@@ -231,6 +245,15 @@ export const api = {
       list[idx].stellarTxHash = Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
       list[idx].updatedAt = new Date().toISOString();
       saveStoredAgreements(list);
+      FirestoreService.saveAgreement(list[idx]);
+      FirestoreService.logEvent({
+        id: `ev-${Date.now()}`,
+        agreementId: list[idx].id,
+        type: 'SOROBAN_LOCKBOX_SECURED',
+        message: `Escrow funded on Stellar Soroban. Tx: ${list[idx].stellarTxHash}`,
+        timestamp: list[idx].updatedAt,
+        actor: 'STELLAR_NETWORK'
+      });
     }
 
     const agr = list[idx] || list[0];
@@ -269,6 +292,15 @@ export const api = {
       list[idx].status = 'CONDITION_MET';
       list[idx].updatedAt = new Date().toISOString();
       saveStoredAgreements(list);
+      FirestoreService.saveAgreement(list[idx]);
+      FirestoreService.logEvent({
+        id: `ev-${Date.now()}`,
+        agreementId: list[idx].id,
+        type: 'CONDITION_VERIFIED',
+        message: `Sentinel verified condition delivery: "${list[idx].condition}".`,
+        timestamp: list[idx].updatedAt,
+        actor: 'KOFU SENTINEL'
+      });
     }
     return { agreement: list[idx] || list[0], events: [] };
   },
@@ -289,6 +321,15 @@ export const api = {
       list[idx].stellarTxHash = hash;
       list[idx].updatedAt = new Date().toISOString();
       saveStoredAgreements(list);
+      FirestoreService.saveAgreement(list[idx]);
+      FirestoreService.logEvent({
+        id: `ev-${Date.now()}`,
+        agreementId: list[idx].id,
+        type: 'SETTLEMENT_RELEASED',
+        message: `Payment of ${list[idx].amount} ${list[idx].currency} released to ${list[idx].counterparty}. Stellar Tx: ${hash}`,
+        timestamp: list[idx].updatedAt,
+        actor: 'STELLAR_NETWORK'
+      });
     }
     return { agreement: list[idx] || list[0], txHash: hash, events: [] };
   },

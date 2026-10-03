@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Agreement, AgreementEvent, AgreementState } from '@kofu/shared';
 import { api } from '../lib/api';
+import { FirestoreService } from '../lib/firestoreService';
 import { PolicyBadge } from '../components/PolicyBadge';
 import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
 import { WalletModal } from '../components/WalletModal';
@@ -72,9 +73,31 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
   };
 
   useEffect(() => {
+    // Initial fetch from backend / local state
     fetchDetails();
-    const interval = setInterval(fetchDetails, 3000);
-    return () => clearInterval(interval);
+
+    // Subscribe to real-time Firestore updates
+    const unsubAgreement = FirestoreService.subscribeAgreement(agreementId, (ag) => {
+      if (ag) {
+        setAgreement(ag);
+        setLoading(false);
+      }
+    });
+
+    const unsubEvents = FirestoreService.subscribeEvents(agreementId, (evs) => {
+      if (evs && evs.length > 0) {
+        setEvents(evs);
+      }
+    });
+
+    // Fallback sync interval for background blockchain sentinel checks
+    const interval = setInterval(fetchDetails, 5000);
+
+    return () => {
+      if (unsubAgreement) unsubAgreement();
+      if (unsubEvents) unsubEvents();
+      clearInterval(interval);
+    };
   }, [agreementId]);
 
   const handleFundEscrow = async () => {
