@@ -1,30 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   HelpCircle,
-  CheckCircle2,
   ExternalLink,
   Copy,
   Check,
   AlertCircle,
   Loader2,
-  ArrowRight,
   Shield,
-  QrCode
+  Smartphone
 } from 'lucide-react';
 import {
   stellarWalletService,
   SupportedWalletId,
 } from '../lib/stellarWallets';
-import {
-  WalletConnectLogo,
-  FreighterLogo,
-  LobstrLogo,
-  XBullLogo,
-  AlbedoLogo,
-  MetaMaskLogo,
-  AllWalletsGridLogo
-} from './WalletLogos';
+import { isConnected as isFreighterConnected } from '@stellar/freighter-api';
+import { isConnected as isLobstrConnected } from '@lobstrco/signer-extension-api';
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -33,12 +25,11 @@ interface WalletModalProps {
   activeWalletId: SupportedWalletId | null;
 }
 
-interface WalletItemConfig {
-  id: SupportedWalletId | 'walletconnect' | 'metamask' | 'all';
-  name: string;
-  badge?: string;
-  badgeType?: 'installed' | 'recent' | 'code' | 'count' | 'web';
-  logo: React.ReactNode;
+interface InstalledStatus {
+  freighter: boolean;
+  lobstr: boolean;
+  xbull: boolean;
+  metamask: boolean;
 }
 
 export const WalletModal: React.FC<WalletModalProps> = ({
@@ -51,14 +42,81 @@ export const WalletModal: React.FC<WalletModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
   const [showHelp, setShowHelp] = useState<boolean>(false);
-  const [freighterInstalled, setFreighterInstalled] = useState<boolean>(false);
+  const [installed, setInstalled] = useState<InstalledStatus>({
+    freighter: false,
+    lobstr: false,
+    xbull: false,
+    metamask: false,
+  });
 
+  // Detect REAL installed status from browser extensions
   useEffect(() => {
-    // Check if Freighter extension is injected in browser
-    if (typeof window !== 'undefined') {
-      const isAvailable = !!(window as any).freighter;
-      setFreighterInstalled(isAvailable);
-    }
+    if (!isOpen) return;
+
+    let isMounted = true;
+
+    const checkRealInstallation = async () => {
+      let isFreighter = false;
+      let isLobstr = false;
+      let isXbull = false;
+      let isMetaMask = false;
+
+      if (typeof window !== 'undefined') {
+        const win = window as any;
+
+        // 1. Freighter detection
+        try {
+          if (win.freighter || (win.stellar && win.stellar.provider === 'freighter')) {
+            isFreighter = true;
+          } else {
+            const res = await isFreighterConnected();
+            isFreighter = !res.error && res.isConnected;
+          }
+        } catch {
+          isFreighter = false;
+        }
+
+        // 2. LOBSTR detection
+        try {
+          if (win.lobstr) {
+            isLobstr = true;
+          } else {
+            isLobstr = await isLobstrConnected();
+          }
+        } catch {
+          isLobstr = false;
+        }
+
+        // 3. xBull detection
+        try {
+          isXbull = Boolean(win.xBullSDK || win.xbull);
+        } catch {
+          isXbull = false;
+        }
+
+        // 4. MetaMask detection
+        try {
+          isMetaMask = Boolean(win.ethereum?.isMetaMask);
+        } catch {
+          isMetaMask = false;
+        }
+      }
+
+      if (isMounted) {
+        setInstalled({
+          freighter: isFreighter,
+          lobstr: isLobstr,
+          xbull: isXbull,
+          metamask: isMetaMask,
+        });
+      }
+    };
+
+    checkRealInstallation();
+
+    return () => {
+      isMounted = false;
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -70,7 +128,6 @@ export const WalletModal: React.FC<WalletModalProps> = ({
       if (id === 'walletconnect' || id === 'all') {
         await stellarWalletService.openUniversalModal();
       } else if (id === 'metamask') {
-        // Launch kit with metamask snap or universal
         await stellarWalletService.openUniversalModal();
       } else {
         await stellarWalletService.connect(id as SupportedWalletId);
@@ -96,65 +153,74 @@ export const WalletModal: React.FC<WalletModalProps> = ({
     }
   };
 
-  const walletList: WalletItemConfig[] = [
+  // Real wallet items using official images
+  const walletList = [
     {
       id: 'freighter',
       name: 'Freighter',
-      badge: freighterInstalled ? 'INSTALLED' : 'RECENT',
-      badgeType: freighterInstalled ? 'installed' : 'recent',
-      logo: <FreighterLogo className="w-9 h-9 shrink-0" />,
+      iconUrl: '/wallets/freighter.png',
+      isInstalled: installed.freighter,
+      badgeText: installed.freighter ? 'INSTALLED' : undefined,
+      badgeStyle: 'installed',
+      fallbackText: 'Stellar & Soroban extension',
     },
     {
       id: 'lobstr',
       name: 'LOBSTR',
-      badge: 'INSTALLED',
-      badgeType: 'installed',
-      logo: <LobstrLogo className="w-9 h-9 shrink-0" />,
+      iconUrl: '/wallets/lobstr.png',
+      isInstalled: installed.lobstr,
+      badgeText: installed.lobstr ? 'INSTALLED' : 'POPULAR',
+      badgeStyle: installed.lobstr ? 'installed' : 'neutral',
+      fallbackText: 'Mobile & Web signer',
     },
     {
       id: 'xbull',
       name: 'xBull',
-      badge: 'INSTALLED',
-      badgeType: 'installed',
-      logo: <XBullLogo className="w-9 h-9 shrink-0" />,
+      iconUrl: '/wallets/xbull.png',
+      isInstalled: installed.xbull,
+      badgeText: installed.xbull ? 'INSTALLED' : undefined,
+      badgeStyle: 'installed',
+      fallbackText: 'Cross-platform power wallet',
     },
     {
       id: 'albedo',
       name: 'Albedo',
-      badge: 'INSTALLED',
-      badgeType: 'installed',
-      logo: <AlbedoLogo className="w-9 h-9 shrink-0" />,
+      iconUrl: '/wallets/albedo.png',
+      isInstalled: false, // Albedo is web-based, zero install needed
+      badgeText: 'WEB SIGNER',
+      badgeStyle: 'web',
+      fallbackText: 'Instant popup (no install)',
     },
     {
       id: 'metamask',
       name: 'MetaMask',
-      badge: 'INSTALLED',
-      badgeType: 'installed',
-      logo: <MetaMaskLogo className="w-9 h-9 shrink-0" />,
+      iconUrl: '/wallets/metamask.svg',
+      isInstalled: installed.metamask,
+      badgeText: installed.metamask ? 'INSTALLED' : 'STELLAR SNAP',
+      badgeStyle: installed.metamask ? 'installed' : 'snap',
+      fallbackText: 'EVM wallet with Stellar Snap',
     },
     {
       id: 'agent',
       name: 'Autonomous Agent',
-      badge: 'RECENT',
-      badgeType: 'recent',
-      logo: (
-        <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-[#00FF66]/30 to-[#0066FF]/30 border border-[#00FF66]/40 flex items-center justify-center text-base shrink-0">
-          🤖
-        </div>
-      ),
+      isCustomIcon: true,
+      badgeText: 'DEV KEYPAIR',
+      badgeStyle: 'neutral',
+      fallbackText: 'Auto-funded local testnet agent',
     },
   ];
 
-  return (
+  // Render via React Portal to document.body so it is ALWAYS centered in the viewport
+  const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-md p-0 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-full sm:max-w-[360px] bg-[#141519] border-t sm:border border-[#262833] rounded-t-3xl sm:rounded-3xl shadow-[0_0_60px_rgba(0,0,0,0.9)] overflow-hidden max-h-[92vh] flex flex-col"
+        className="w-full max-w-[360px] sm:max-w-[380px] bg-[#141519] border border-[#262833] rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Header Bar */}
+        {/* Header Bar */}
         <div className="px-4 py-3.5 flex items-center justify-between border-b border-[#1E2028]">
           <button
             onClick={() => setShowHelp(!showHelp)}
@@ -181,7 +247,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
         {showHelp && (
           <div className="p-3.5 bg-[#1B1D24] border-b border-[#262833] text-xs font-sans text-[#A4A8B8] leading-relaxed">
             <span className="font-semibold text-[#F3F3F6] block mb-1">What is a Stellar Wallet?</span>
-            Wallets let you sign Soroban smart contract transactions, manage Stellar assets like USDC, and authorize autonomous agents without sharing private keys.
+            Wallets allow you to hold Stellar lumens (XLM), USDC, and authorize Soroban smart contract operations without revealing private keys.
           </div>
         )}
 
@@ -194,7 +260,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
         )}
 
         {/* Content Area */}
-        <div className="p-3.5 overflow-y-auto space-y-2">
+        <div className="p-3.5 overflow-y-auto max-h-[70vh] space-y-2">
           {activeAddress ? (
             /* Connected Wallet State */
             <div className="space-y-3.5 py-1">
@@ -238,16 +304,21 @@ export const WalletModal: React.FC<WalletModalProps> = ({
               </div>
             </div>
           ) : (
-            /* Wallet Selection List matching user's reference image */
             <>
-              {/* Elevated Top Card: WalletConnect with QR Code Badge */}
+              {/* Elevated Top Card: Real WalletConnect with QR Code Badge */}
               <button
                 onClick={() => handleConnectWallet('walletconnect')}
                 disabled={!!connectingId}
                 className="w-full p-3 rounded-2xl bg-[#1A1B22] hover:bg-[#20222A] border border-[#262833] hover:border-[#3396FF]/50 transition-all flex items-center justify-between group cursor-pointer"
               >
                 <div className="flex items-center space-x-3">
-                  <WalletConnectLogo className="w-8 h-8 rounded-lg shrink-0" />
+                  <div className="w-9 h-9 rounded-xl bg-[#3396FF] flex items-center justify-center p-1.5 overflow-hidden shrink-0 shadow-sm">
+                    <img
+                      src="/wallets/walletconnect.png"
+                      alt="WalletConnect"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                   <span className="text-sm font-semibold text-[#F3F3F6] group-hover:text-[#3396FF] transition-colors">
                     WalletConnect
                   </span>
@@ -263,7 +334,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                 </div>
               </button>
 
-              {/* Wallet Items List */}
+              {/* Wallet List Items with Real Official Logos */}
               <div className="space-y-1.5 pt-1">
                 {walletList.map((w) => {
                   const isConnecting = connectingId === w.id;
@@ -275,7 +346,19 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                       className="w-full px-3 py-2.5 rounded-2xl bg-[#17181F] hover:bg-[#1E2028] border border-transparent hover:border-[#2A2C38] transition-all flex items-center justify-between group cursor-pointer text-left"
                     >
                       <div className="flex items-center space-x-3">
-                        {w.logo}
+                        {w.isCustomIcon ? (
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00FF66]/20 to-[#0066FF]/20 border border-[#00FF66]/30 flex items-center justify-center text-lg shrink-0">
+                            🤖
+                          </div>
+                        ) : (
+                          <div className="w-9 h-9 rounded-xl bg-[#0D0E12] border border-[#23252E] flex items-center justify-center p-1 overflow-hidden shrink-0 shadow-sm">
+                            <img
+                              src={w.iconUrl}
+                              alt={w.name}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        )}
                         <span className="text-sm font-medium text-[#F3F3F6] group-hover:text-white transition-colors">
                           {w.name}
                         </span>
@@ -284,15 +367,19 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                       <div className="flex items-center space-x-2">
                         {isConnecting ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin text-[#00FF66]" />
-                        ) : w.badge ? (
+                        ) : w.badgeText ? (
                           <span
                             className={`text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
-                              w.badgeType === 'installed'
+                              w.badgeStyle === 'installed'
                                 ? 'bg-[#0E3320] text-[#00FF66] border border-[#00FF66]/25'
+                                : w.badgeStyle === 'web'
+                                ? 'bg-[#2E1E4D] text-[#C084FC] border border-[#C084FC]/25'
+                                : w.badgeStyle === 'snap'
+                                ? 'bg-[#3B2514] text-[#FB923C] border border-[#FB923C]/25'
                                 : 'bg-[#23252E] text-[#8E92A2]'
                             }`}
                           >
-                            {w.badge}
+                            {w.badgeText}
                           </span>
                         ) : null}
                       </div>
@@ -307,7 +394,14 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                   className="w-full px-3 py-2.5 rounded-2xl bg-[#17181F] hover:bg-[#1E2028] border border-transparent hover:border-[#2A2C38] transition-all flex items-center justify-between group cursor-pointer text-left"
                 >
                   <div className="flex items-center space-x-3">
-                    <AllWalletsGridLogo className="w-9 h-9 shrink-0" />
+                    <div className="w-9 h-9 rounded-xl bg-[#1A2035] flex items-center justify-center shrink-0">
+                      <div className="grid grid-cols-2 gap-1 p-2">
+                        <div className="w-1.5 h-1.5 rounded-sm bg-[#3B82F6]"></div>
+                        <div className="w-1.5 h-1.5 rounded-sm bg-[#3B82F6]"></div>
+                        <div className="w-1.5 h-1.5 rounded-sm bg-[#3B82F6]"></div>
+                        <div className="w-1.5 h-1.5 rounded-sm bg-[#3B82F6]"></div>
+                      </div>
+                    </div>
                     <span className="text-sm font-medium text-[#F3F3F6] group-hover:text-white transition-colors">
                       All Wallets
                     </span>
@@ -328,7 +422,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
           )}
         </div>
 
-        {/* Subtle Footer */}
+        {/* Footer */}
         <div className="px-4 py-2.5 bg-[#101115] border-t border-[#1C1D24] flex items-center justify-between text-[10px] text-[#6C7082]">
           <div className="flex items-center space-x-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00FF66]"></span>
@@ -339,4 +433,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 };
