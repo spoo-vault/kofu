@@ -120,7 +120,7 @@ impl PokaEscrowContract {
 
         // Emit on-chain event for Sentinel indexing
         env.events().publish(
-            (symbol_short!("poka"), symbol_short!("deposit")),
+            (symbol_short!("kofu"), symbol_short!("deposit")),
             (agreement_id, buyer, seller, amount),
         );
 
@@ -164,7 +164,7 @@ impl PokaEscrowContract {
         env.storage().persistent().extend_ttl(&agreement_key, 50_000, 100_000);
 
         env.events().publish(
-            (symbol_short!("poka"), symbol_short!("cond_met")),
+            (symbol_short!("kofu"), symbol_short!("cond_met")),
             (agreement_id, proof_hash),
         );
 
@@ -206,7 +206,7 @@ impl PokaEscrowContract {
         env.storage().persistent().extend_ttl(&agreement_key, 50_000, 100_000);
 
         env.events().publish(
-            (symbol_short!("poka"), symbol_short!("settled")),
+            (symbol_short!("kofu"), symbol_short!("settled")),
             (agreement_id, agr.seller, agr.amount),
         );
 
@@ -255,7 +255,7 @@ impl PokaEscrowContract {
         env.storage().persistent().extend_ttl(&agreement_key, 50_000, 100_000);
 
         env.events().publish(
-            (symbol_short!("poka"), symbol_short!("refunded")),
+            (symbol_short!("kofu"), symbol_short!("refunded")),
             (agreement_id, agr.buyer, agr.amount),
         );
 
@@ -285,7 +285,7 @@ impl PokaEscrowContract {
         env.storage().persistent().set(&agreement_key, &agr);
 
         env.events().publish(
-            (symbol_short!("poka"), symbol_short!("disputed")),
+            (symbol_short!("kofu"), symbol_short!("disputed")),
             (agreement_id, caller),
         );
 
@@ -339,7 +339,7 @@ impl PokaEscrowContract {
         env.storage().persistent().set(&agreement_key, &agr);
 
         env.events().publish(
-            (symbol_short!("poka"), symbol_short!("resolved")),
+            (symbol_short!("kofu"), symbol_short!("resolved")),
             (agreement_id, buyer_payout, seller_payout),
         );
 

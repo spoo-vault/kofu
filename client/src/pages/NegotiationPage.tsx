@@ -22,7 +22,7 @@ export const NegotiationPage: React.FC<NegotiationPageProps> = ({
   const script: NegotiationMessage[] = [
     {
       id: 'm1',
-      sender: 'POKA BUYER AGENT',
+      sender: 'KOFU BUYER AGENT',
       senderRole: 'buyer_agent',
       content: '$50 upon completion of website delivery.',
       proposedAmount: 50,
@@ -40,7 +40,7 @@ export const NegotiationPage: React.FC<NegotiationPageProps> = ({
     },
     {
       id: 'm3',
-      sender: 'POKA BUYER AGENT',
+      sender: 'KOFU BUYER AGENT',
       senderRole: 'buyer_agent',
       content: '$60 base + $5 completion bonus if verified and delivered within 24 hours.',
       proposedAmount: 65,

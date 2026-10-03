@@ -37,7 +37,7 @@ export interface ParsedAgreementInput {
 
 export interface Agreement {
   id: string;
-  humanReadableId: string;
+  humanReadableId: string; // e.g. KOFU-001
   initiator: string;
   counterparty: string;
   counterpartyType: 'human' | 'agent';

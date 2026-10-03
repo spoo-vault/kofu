@@ -70,7 +70,7 @@ export const CreateAgreementPage: React.FC<CreateAgreementPageProps> = ({
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-[#00FF66]"></span>
             <span className="text-xs font-mono font-bold tracking-widest text-[#00FF66] uppercase">
-              POKA UNDERSTANDS
+              KOFU UNDERSTANDS
             </span>
           </div>
           <button

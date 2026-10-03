@@ -37,7 +37,7 @@ export interface ParsedAgreementInput {
 
 export interface Agreement {
   id: string;
-  humanReadableId: string; // e.g. POKA-001
+  humanReadableId: string; // e.g. KOFU-001
   initiator: string; // Stellar public key (G...)
   counterparty: string; // Stellar public key or agent name
   counterpartyType: 'human' | 'agent';

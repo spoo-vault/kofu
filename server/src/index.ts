@@ -25,7 +25,7 @@ app.use('/api/stellar', stellarRouter);
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
-    service: 'POKA Autonomous Economic Agreement Protocol',
+    service: 'KOFU Autonomous Economic Agreement Protocol',
     chain: 'Stellar & Soroban',
     network: stellarConfig.network === 'public' ? 'Stellar Mainnet' : 'Stellar Testnet',
     sorobanContractId: stellarConfig.contractId,
@@ -35,9 +35,9 @@ app.get('/api/health', (_req, res) => {
 
 if (!process.env.VERCEL && !process.env.SERVERLESS) {
   app.listen(PORT, () => {
-    console.log(`[POKA SERVER] Running on port ${PORT}`);
-    console.log(`[POKA SERVER] Stellar Network: ${stellarConfig.network === 'public' ? 'Stellar Mainnet' : 'Stellar Testnet'}`);
-    console.log(`[POKA SERVER] Soroban Contract ID: ${stellarConfig.contractId}`);
+    console.log(`[KOFU SERVER] Running on port ${PORT}`);
+    console.log(`[KOFU SERVER] Stellar Network: ${stellarConfig.network === 'public' ? 'Stellar Mainnet' : 'Stellar Testnet'}`);
+    console.log(`[KOFU SERVER] Soroban Contract ID: ${stellarConfig.contractId}`);
   });
 }
 

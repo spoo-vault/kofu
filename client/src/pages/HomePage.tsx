@@ -59,7 +59,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationD
         {/* System Pill Tag */}
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#121217] border border-[#1E1E28] text-[11px] mb-8 animate-fade-in">
           <span className="w-1.5 h-1.5 rounded-full bg-[#00FF66] animate-pulse"></span>
-          <span className="text-[#848494] font-medium">POKA PROTOCOL</span>
+          <span className="text-[#848494] font-medium">KOFU PROTOCOL</span>
           <span className="text-[#505060]">&bull;</span>
           <span className="text-[#00FF66]">STELLAR &amp; SOROBAN</span>
           <span className="text-[#505060]">v0.2</span>
@@ -207,7 +207,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationD
             THE PROGRAMMABLE ESCROW LOOP
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#EDEDED] tracking-tight uppercase">
-            How POKA Works
+            How KOFU Works
           </h2>
           <p className="text-xs sm:text-sm text-[#848494] max-w-xl mx-auto">
             From informal natural language agreements to cryptographic on-chain release in 3 deterministic steps.
@@ -303,14 +303,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onParsed, onOpenNegotiationD
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 max-w-5xl mx-auto border-t border-[#1E1E28] text-xs text-[#505060] flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <span>POKA Protocol &middot; Open Source on </span>
+          <span>KOFU Protocol &middot; Open Source on </span>
           <a
-            href="https://github.com/spoo-vault/poka"
+            href="https://github.com/spoo-vault/kofu"
             target="_blank"
             rel="noreferrer"
             className="text-[#848494] hover:text-[#00FF66] transition-colors"
           >
-            GitHub (spoo-vault/poka)
+            GitHub (spoo-vault/kofu)
           </a>
         </div>
 

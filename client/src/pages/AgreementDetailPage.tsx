@@ -185,7 +185,7 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
             {/* POKA ESCROW */}
             <div className="relative py-2 md:py-0 flex flex-col items-center justify-center">
               <div className="flex items-center space-x-2 text-[#00FF66] mb-1">
-                <span className="text-xs font-bold tracking-wider">POKA ESCROW</span>
+                <span className="text-xs font-bold tracking-wider">KOFU ESCROW</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#00FF66] animate-ping"></span>
               </div>
               <div className="text-[11px] text-[#848494] bg-[#121217] px-2.5 py-1 rounded border border-[#1E1E28]">
@@ -359,14 +359,14 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
         )}
       </div>
 
-      {/* POKA SENTINEL Live Activity & Monitoring Panel */}
+      {/* KOFU SENTINEL Live Activity & Monitoring Panel */}
       <div className="border border-[#1E1E28] bg-[#0D0D11] rounded-lg p-6 space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-[#1E1E28]">
           <div className="flex items-center space-x-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#00FF66] shadow-[0_0_8px_#00FF66] animate-pulse"></span>
             <div>
               <span className="text-sm font-bold text-[#F3F3F6] uppercase tracking-wider block">
-                POKA SENTINEL
+                KOFU SENTINEL
               </span>
               <span className="text-[11px] text-[#848494]">
                 Autonomous Observer &middot; {agreement.status === 'SETTLED' ? 'Settlement Complete' : 'Monitoring delivery condition'}

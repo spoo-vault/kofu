@@ -87,7 +87,7 @@ class DataStore {
   }
 
   public getNextHumanReadableId(): string {
-    const id = `POKA-${String(this.counter).padStart(3, '0')}`;
+    const id = `KOFU-${String(this.counter).padStart(3, '0')}`;
     this.counter++;
     this.saveToDisk();
     return id;

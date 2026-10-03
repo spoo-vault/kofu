@@ -13,14 +13,14 @@ export class SentinelService {
       agreementId: agreement.id,
       type: 'AGREEMENT_CREATED',
       message: `Agreement initialized with terms: ${agreement.amount} ${agreement.currency} for '${agreement.condition}'.`,
-      actor: 'POKA SENTINEL',
+      actor: 'KOFU SENTINEL',
     });
 
     db.addEvent(agreement.id, {
       agreementId: agreement.id,
       type: 'COUNTERPARTY_NOTIFIED',
       message: `Counterparty '${agreement.counterparty}' notified via Stellar Agent protocol.`,
-      actor: 'POKA SENTINEL',
+      actor: 'KOFU SENTINEL',
     });
   }
 
@@ -32,7 +32,7 @@ export class SentinelService {
       agreementId: agreement.id,
       type: 'TERMS_ACCEPTED',
       message: `Terms accepted by ${agreement.counterparty}. Economic agreement committed at ${agreement.amount} ${agreement.currency}.`,
-      actor: 'POKA SENTINEL',
+      actor: 'KOFU SENTINEL',
     });
   }
 
@@ -44,7 +44,7 @@ export class SentinelService {
       agreementId: agreement.id,
       type: 'ESCROW_FUNDED',
       message: `Escrow funded on Stellar ${stellarConfig.network === 'public' ? 'Mainnet' : 'Testnet'}: ${agreement.amount} ${agreement.currency}. Tx: ${txHash.substring(0, 12)}...`,
-      actor: 'POKA SENTINEL',
+      actor: 'KOFU SENTINEL',
       metadata: { txHash, ledger, explorerUrl: getExplorerTxUrl(txHash) },
     });
 
@@ -52,7 +52,7 @@ export class SentinelService {
       agreementId: agreement.id,
       type: 'MONITORING_STARTED',
       message: `Autonomous Sentinel initialized. Monitoring Soroban contract: ${stellarConfig.contractId.substring(0, 10)}... for condition: '${agreement.condition}'.`,
-      actor: 'POKA SENTINEL',
+      actor: 'KOFU SENTINEL',
     });
   }
 
@@ -64,7 +64,7 @@ export class SentinelService {
       agreementId: agreement.id,
       type: 'CONDITION_DETECTED',
       message: `Fulfillment signal detected for '${agreement.condition}'.`,
-      actor: 'POKA SENTINEL',
+      actor: 'KOFU SENTINEL',
     });
 
     // Mark condition satisfied
@@ -75,7 +75,7 @@ export class SentinelService {
       agreementId: agreement.id,
       type: 'CONDITION_VERIFIED',
       message: `Sentinel verified cryptographic proofs & deliverable requirements. Condition satisfied on-chain.`,
-      actor: 'POKA SENTINEL',
+      actor: 'KOFU SENTINEL',
     });
 
     db.saveAgreement(agreement);
@@ -98,7 +98,7 @@ export class SentinelService {
         agreementId: agreement.id,
         type: 'SETTLEMENT_REJECTED',
         message: `Policy rejection: ${policyCheck.reason}`,
-        actor: 'POKA SENTINEL',
+        actor: 'KOFU SENTINEL',
       });
       throw new Error(policyCheck.reason);
     }
@@ -108,7 +108,7 @@ export class SentinelService {
       agreementId: agreement.id,
       type: 'SETTLEMENT_INITIATED',
       message: `Settlement initiated. Preparing Soroban release transaction for ${agreement.amount} ${agreement.currency}.`,
-      actor: 'POKA SENTINEL',
+      actor: 'KOFU SENTINEL',
     });
 
     const tx = await stellarEscrow.release({
@@ -131,7 +131,7 @@ export class SentinelService {
       agreementId: agreement.id,
       type: 'PAYMENT_RELEASED',
       message: `Payment released via Soroban escrow. Stellar transaction confirmed: ${tx.txHash}. Settlement complete.`,
-      actor: 'POKA SENTINEL',
+      actor: 'KOFU SENTINEL',
       metadata: { txHash: tx.txHash, explorerUrl: tx.explorerUrl, ledger: tx.stellarLedger },
     });
 

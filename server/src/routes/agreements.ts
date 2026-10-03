@@ -67,7 +67,7 @@ agreementsRouter.post('/', (req, res) => {
       return;
     }
 
-    const id = `poka-${Date.now()}`;
+    const id = `kofu-${Date.now()}`;
     const humanReadableId = db.getNextHumanReadableId();
 
     const agreement: Agreement = {

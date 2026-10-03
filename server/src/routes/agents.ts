@@ -7,7 +7,7 @@ agentsRouter.get('/', (_req, res) => {
   res.json([
     {
       id: 'agent-buyer',
-      name: 'POKA Buyer Agent',
+      name: 'KOFU Buyer Agent',
       type: 'autonomous_delegated',
       status: 'ONLINE',
       address: 'GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5',

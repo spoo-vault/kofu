@@ -40,7 +40,7 @@ fn test_escrow_full_happy_path() {
     assert_eq!(client.get_sentinel(), Some(sentinel.clone()));
 
     // Deposit 50 USDC
-    let agreement_id = Symbol::new(&env, "poka_001");
+    let agreement_id = Symbol::new(&env, "kofu_001");
     let amount = 5_000_000; // 50 units
     let timeout = 1000;
 
@@ -92,7 +92,7 @@ fn test_escrow_refund_after_timeout() {
     let client = PokaEscrowContractClient::new(&env, &contract_id);
     client.initialize(&admin, &sentinel);
 
-    let agreement_id = Symbol::new(&env, "poka_002");
+    let agreement_id = Symbol::new(&env, "kofu_002");
     let amount = 3_000_000;
     let timeout = 500;
 
@@ -130,7 +130,7 @@ fn test_escrow_sentinel_abort_refund() {
     let client = PokaEscrowContractClient::new(&env, &contract_id);
     client.initialize(&admin, &sentinel);
 
-    let agreement_id = Symbol::new(&env, "poka_003");
+    let agreement_id = Symbol::new(&env, "kofu_003");
     client.deposit(&agreement_id, &buyer, &seller, &token.address, &5_000_000, &10_000);
 
     // Sentinel aborts/refunds immediately without waiting for timeout

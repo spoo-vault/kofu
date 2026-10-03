@@ -28,7 +28,7 @@ export class AgreementParser {
    * High-intelligence LLM parsing using Google Gemini 2.0 Flash
    */
   private static async parseWithGemini(text: string, apiKey: string): Promise<ParsedAgreementInput | null> {
-    const systemInstruction = `You are POKA's Economic Agreement Parser on Stellar and Soroban.
+    const systemInstruction = `You are KOFU's Economic Agreement Parser on Stellar and Soroban.
 Extract the structured economic agreement from the user's natural language input.
 Supported currencies on Stellar: USDC, XLM, EURC, USD (defaults to USDC).
 Return strictly valid JSON conforming to this schema:

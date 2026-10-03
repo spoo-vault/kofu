@@ -35,7 +35,7 @@ export class AgentNegotiator {
     const messages: NegotiationMessage[] = [
       {
         id: 'msg-1',
-        sender: 'POKA Buyer Agent',
+        sender: 'KOFU Buyer Agent',
         senderRole: 'buyer_agent',
         content: `${initialAmount} ${currency} upon completion of '${condition}'.`,
         proposedAmount: initialAmount,
@@ -55,7 +55,7 @@ export class AgentNegotiator {
       },
       {
         id: 'msg-3',
-        sender: 'POKA Buyer Agent',
+        sender: 'KOFU Buyer Agent',
         senderRole: 'buyer_agent',
         content: `${buyerCompromise} base + ${bonus} completion bonus in ${currency} if delivered within 24 hours.`,
         proposedAmount: finalAmount,
