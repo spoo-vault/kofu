@@ -4,7 +4,8 @@ import { AgreementParser } from '../services/ai/parser.js';
 import { policyEngine } from '../services/ai/policy.js';
 import { AgentNegotiator } from '../services/ai/negotiator.js';
 import { SentinelService } from '../services/sentinel/monitor.js';
-import { celoService } from '../services/celo/transactions.js';
+import { stellarEscrow } from '../services/stellar/escrow.js';
+import { stellarConfig } from '../services/stellar/config.js';
 import { Agreement, AutonomyLevel } from '../types/shared.js';
 
 export const agreementsRouter = Router();
@@ -53,7 +54,7 @@ agreementsRouter.post('/', (req, res) => {
       counterparty,
       counterpartyType = 'human',
       amount,
-      currency = 'USD',
+      currency = 'USDC',
       condition,
       deadline = 'Tomorrow',
       autonomyLevel = 'ASSISTED',
@@ -72,16 +73,16 @@ agreementsRouter.post('/', (req, res) => {
     const agreement: Agreement = {
       id,
       humanReadableId,
-      initiator: 'Alice (0x71C...49b)',
+      initiator: 'GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5 (Alice)',
       counterparty,
       counterpartyType,
       amount: Number(amount),
-      currency,
+      currency: ['USDC', 'XLM', 'EURC'].includes(currency) ? (currency as any) : 'USDC',
       condition,
       deadline,
       status: startState as any,
       autonomyLevel: autonomyLevel as AutonomyLevel,
-      escrowAddress: '0x992b4A25b8C776D38006E1a82E88909191eFa9B1',
+      sorobanContractId: stellarConfig.contractId,
       escrowFunded: false,
       conditionSatisfied: false,
       createdAt: new Date().toISOString(),
@@ -109,7 +110,8 @@ agreementsRouter.post('/:id/negotiate', (req, res) => {
     const negotiationResult = AgentNegotiator.simulateNegotiation(
       agreement.amount,
       agreement.condition,
-      agreement.deadline
+      agreement.deadline,
+      agreement.currency
     );
 
     agreement.negotiationHistory = negotiationResult.messages;
@@ -131,7 +133,7 @@ agreementsRouter.post('/:id/negotiate', (req, res) => {
   }
 });
 
-// Fund Escrow
+// Fund Escrow on Soroban
 agreementsRouter.post('/:id/fund', async (req, res) => {
   try {
     const agreement = db.getAgreement(req.params.id);
@@ -140,22 +142,24 @@ agreementsRouter.post('/:id/fund', async (req, res) => {
       return;
     }
 
-    const tx = await celoService.depositEscrow({
+    const tx = await stellarEscrow.deposit({
       agreementId: agreement.id,
       humanReadableId: agreement.humanReadableId,
       amount: agreement.amount,
       currency: agreement.currency,
       from: agreement.initiator,
-      to: agreement.escrowAddress || '0x992b4A25b8C77...CeloEscrow',
+      to: stellarConfig.contractId,
     });
 
     db.addTransaction(tx);
 
     agreement.escrowFunded = true;
     agreement.status = 'ESCROWED';
+    agreement.stellarTxHash = tx.txHash;
+    agreement.stellarLedger = tx.stellarLedger;
     db.saveAgreement(agreement);
 
-    SentinelService.onEscrowFunded(agreement, tx.txHash);
+    SentinelService.onEscrowFunded(agreement, tx.txHash, tx.stellarLedger);
 
     // Transition to MONITORING
     agreement.status = 'MONITORING';
@@ -190,7 +194,7 @@ agreementsRouter.post('/:id/satisfy', async (req, res) => {
   }
 });
 
-// Settle / Release Payment
+// Settle / Release Payment on Soroban
 agreementsRouter.post('/:id/release', async (req, res) => {
   try {
     const agreement = db.getAgreement(req.params.id);

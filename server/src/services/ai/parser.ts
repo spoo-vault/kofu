@@ -2,7 +2,7 @@ import { ParsedAgreementInput, AutonomyLevel } from '../../types/shared.js';
 
 export class AgreementParser {
   /**
-   * Parses natural language into a validated structured Agreement object.
+   * Parses natural language into a validated structured Agreement object for Stellar.
    * If GEMINI_API_KEY is available, leverages Google Gemini 2.0.
    * Otherwise, seamlessly falls back to high-accuracy deterministic heuristics.
    */
@@ -28,16 +28,17 @@ export class AgreementParser {
    * High-intelligence LLM parsing using Google Gemini 2.0 Flash
    */
   private static async parseWithGemini(text: string, apiKey: string): Promise<ParsedAgreementInput | null> {
-    const systemInstruction = `You are POKA's Economic Agreement Parser on Celo.
+    const systemInstruction = `You are POKA's Economic Agreement Parser on Stellar and Soroban.
 Extract the structured economic agreement from the user's natural language input.
+Supported currencies on Stellar: USDC, XLM, EURC, USD (defaults to USDC).
 Return strictly valid JSON conforming to this schema:
 {
   "counterparty": "string (e.g. David, Research Agent, Auditor)",
   "counterpartyType": "human" | "agent",
   "amount": number,
-  "currency": "USD" | "USDC" | "CELO" | "cUSD",
+  "currency": "USDC" | "XLM" | "EURC" | "USD",
   "condition": "string (e.g. Website delivered, Data verified)",
-  "deadline": "string (e.g. Tomorrow, 48 Hours, 2026-09-25)",
+  "deadline": "string (e.g. Tomorrow, 48 Hours, 2026-10-15)",
   "escrowRequired": boolean,
   "autonomyLevel": "MANUAL" | "ASSISTED" | "AUTONOMOUS",
   "confidence": number between 0.8 and 0.99
@@ -76,7 +77,7 @@ Return strictly valid JSON conforming to this schema:
       counterparty: parsed.counterparty || 'Counterparty',
       counterpartyType: parsed.counterpartyType === 'agent' ? 'agent' : 'human',
       amount: typeof parsed.amount === 'number' ? parsed.amount : 50,
-      currency: ['USD', 'USDC', 'CELO', 'cUSD'].includes(parsed.currency) ? parsed.currency : 'USD',
+      currency: ['USDC', 'XLM', 'EURC', 'USD'].includes(parsed.currency) ? parsed.currency : 'USDC',
       condition: parsed.condition || 'Deliverable completed and verified',
       deadline: parsed.deadline || 'Tomorrow',
       escrowRequired: parsed.escrowRequired !== false,
@@ -89,81 +90,47 @@ Return strictly valid JSON conforming to this schema:
   }
 
   /**
-   * Deterministic zero-dependency regex extractor
+   * Deterministic zero-dependency regex extractor for Stellar
    */
   public static parseDeterministic(text: string): ParsedAgreementInput {
     let counterparty = 'Counterparty';
     let counterpartyType: 'human' | 'agent' = 'human';
     let amount = 50;
-    let currency = 'USD';
+    let currency: 'USDC' | 'XLM' | 'EURC' | 'USD' = 'USDC';
     let condition = 'Deliverable completed and verified';
     let deadline = 'Tomorrow';
-    let escrowRequired = true;
-    let autonomyLevel: AutonomyLevel = 'ASSISTED';
-    let confidence = 0.92;
 
-    // 1. Extract Amount and Currency
-    const amountMatch = text.match(/(?:\$|€|£)?\s*([0-9]+(?:\.[0-9]+)?)\s*(USD|USDC|CELO|cUSD|dollars?)?/i);
+    // Extract amount & currency
+    const amountMatch = text.match(/\$?(\d+(\.\d+)?)\s*(USDC|XLM|EURC|USD|dollars?)?/i);
     if (amountMatch) {
-      const parsedVal = parseFloat(amountMatch[1]);
-      if (!isNaN(parsedVal)) {
-        amount = parsedVal;
-      }
-      if (text.includes('CELO') || text.includes('celo')) {
-        currency = 'CELO';
-      } else if (text.includes('USDC') || text.includes('usdc') || text.includes('cUSD')) {
-        currency = 'USDC';
-      } else {
-        currency = 'USD';
-      }
+      amount = parseFloat(amountMatch[1]);
+      const matchedCurr = amountMatch[3]?.toUpperCase();
+      if (matchedCurr === 'XLM') currency = 'XLM';
+      else if (matchedCurr === 'EURC') currency = 'EURC';
+      else currency = 'USDC';
     }
 
-    // 2. Extract Counterparty
-    const counterpartyMatch = text.match(/(?:pay|send(?:\s+to)?|give|transfer(?:\s+to)?|hire)\s+([a-zA-Z0-9_\-\.\s]+?)(?=\s+(?:\$|[0-9]|when|if|once|for|to\s+deliver))/i);
-    if (counterpartyMatch && counterpartyMatch[1]) {
-      const extracted = counterpartyMatch[1].trim();
-      if (!['usd', 'usdc', 'celo', 'dollars'].includes(extracted.toLowerCase())) {
-        counterparty = extracted;
-      }
-    }
-
-    if (counterparty.toLowerCase().includes('agent') || counterparty.toLowerCase().includes('bot') || counterparty.startsWith('0x')) {
+    // Detect agent counterparties
+    if (/agent|bot|oracle|service|crawler|auditor/i.test(text)) {
       counterpartyType = 'agent';
     }
 
-    // 3. Extract Condition
-    const conditionMatch = text.match(/(?:when|if|once|after)\s+(.+?)(?=\s+(?:by|within|before|tomorrow|in\s+\d+|deadline)|$)/i);
+    // Extract counterparty name
+    const toMatch = text.match(/(?:pay|send|release to|escrow for|contract with)\s+([A-Za-z0-9_ -]+?)\s+(?:\$|\d+|when|if|once|upon)/i);
+    if (toMatch && toMatch[1]) {
+      counterparty = toMatch[1].trim();
+    }
+
+    // Extract condition
+    const conditionMatch = text.match(/(?:when|if|once|upon|after)\s+(.+?)(?:\s+by|\s+tomorrow|\s+in\s+\d+|\.|$)/i);
     if (conditionMatch && conditionMatch[1]) {
-      let rawCondition = conditionMatch[1].trim();
-      if (rawCondition.toLowerCase().includes('delivers the website') || rawCondition.toLowerCase().includes('website is delivered')) {
-        condition = 'Website delivered';
-      } else if (rawCondition.toLowerCase().includes('audit') || rawCondition.toLowerCase().includes('contract')) {
-        condition = 'Smart contract audit verified';
-      } else if (rawCondition.toLowerCase().includes('dataset') || rawCondition.toLowerCase().includes('analytics')) {
-        condition = 'Verified website analytics';
-      } else {
-        condition = rawCondition.charAt(0).toUpperCase() + rawCondition.slice(1);
-      }
+      condition = conditionMatch[1].trim();
     }
 
-    // 4. Extract Deadline
-    const deadlineMatch = text.match(/(?:by|within|in|before)\s+([^,.]+)|(?:tomorrow)/i);
+    // Extract deadline
+    const deadlineMatch = text.match(/(?:by|tomorrow|within\s+\d+\s+hours?|in\s+\d+\s+days?|\d{4}-\d{2}-\d{2})/i);
     if (deadlineMatch) {
-      const matchedDeadline = deadlineMatch[0].trim();
-      if (matchedDeadline.toLowerCase() === 'tomorrow') {
-        deadline = 'Tomorrow';
-      } else {
-        deadline = matchedDeadline.charAt(0).toUpperCase() + matchedDeadline.slice(1);
-      }
-    }
-
-    // 5. Autonomy Level check
-    if (text.toLowerCase().includes('autonomous') || text.toLowerCase().includes('auto-execute')) {
-      autonomyLevel = 'AUTONOMOUS';
-    } else if (text.toLowerCase().includes('manual')) {
-      autonomyLevel = 'MANUAL';
-    } else {
-      autonomyLevel = 'ASSISTED';
+      deadline = deadlineMatch[0].trim();
     }
 
     return {
@@ -173,10 +140,10 @@ Return strictly valid JSON conforming to this schema:
       currency,
       condition,
       deadline,
-      escrowRequired,
+      escrowRequired: true,
       rawText: text,
-      confidence,
-      autonomyLevel,
+      confidence: 0.94,
+      autonomyLevel: 'ASSISTED',
     };
   }
 }

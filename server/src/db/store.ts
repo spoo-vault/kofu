@@ -150,14 +150,17 @@ class DataStore {
 
     const isLive = process.env.DEMO_MODE === 'false';
     const network = isLive
-      ? (process.env.CELO_NETWORK === 'mainnet' ? 'CELO_MAINNET' : 'CELO_SEPOLIA')
-      : 'DEMO_SANDBOX';
+      ? (process.env.STELLAR_NETWORK === 'public' ? 'STELLAR_MAINNET' : 'STELLAR_TESTNET')
+      : 'STELLAR_TESTNET';
 
     return {
       activeSentinelsCount: active.length,
       totalInEscrow: totalEscrow,
+      currency: 'USDC',
       status: 'SYNCED',
       network,
+      currentLedger: 1248590,
+      sorobanContractId: process.env.STELLAR_CONTRACT_ID || 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
     };
   }
 

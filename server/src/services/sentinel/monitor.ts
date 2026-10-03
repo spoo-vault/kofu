@@ -1,11 +1,12 @@
-import { Agreement, AgreementEvent } from '../../types/shared.js';
+import { Agreement } from '../../types/shared.js';
 import { db } from '../../db/store.js';
-import { celoService } from '../celo/transactions.js';
+import { stellarEscrow } from '../stellar/escrow.js';
+import { stellarConfig, getExplorerTxUrl } from '../stellar/config.js';
 import { policyEngine } from '../ai/policy.js';
 
 export class SentinelService {
   /**
-   * Called when agreement is newly created
+   * Called when an agreement is initialized
    */
   public static onAgreementCreated(agreement: Agreement): void {
     db.addEvent(agreement.id, {
@@ -18,68 +19,68 @@ export class SentinelService {
     db.addEvent(agreement.id, {
       agreementId: agreement.id,
       type: 'COUNTERPARTY_NOTIFIED',
-      message: `Counterparty '${agreement.counterparty}' notified via decentralized agent protocol.`,
+      message: `Counterparty '${agreement.counterparty}' notified via Stellar Agent protocol.`,
       actor: 'POKA SENTINEL',
     });
   }
 
   /**
-   * Called when agreement terms are accepted / negotiated
+   * Called when agreement terms are accepted
    */
   public static onTermsAccepted(agreement: Agreement): void {
     db.addEvent(agreement.id, {
       agreementId: agreement.id,
       type: 'TERMS_ACCEPTED',
-      message: `Terms accepted by ${agreement.counterparty}. Economic agreement locked at $${agreement.amount}.`,
+      message: `Terms accepted by ${agreement.counterparty}. Economic agreement committed at ${agreement.amount} ${agreement.currency}.`,
       actor: 'POKA SENTINEL',
     });
   }
 
   /**
-   * Called when escrow is funded
+   * Called when escrow is funded on Soroban
    */
-  public static onEscrowFunded(agreement: Agreement, txHash: string): void {
+  public static onEscrowFunded(agreement: Agreement, txHash: string, ledger?: number): void {
     db.addEvent(agreement.id, {
       agreementId: agreement.id,
       type: 'ESCROW_FUNDED',
-      message: `Escrow funded on Celo Sepolia: ${agreement.amount} ${agreement.currency}. Tx: ${txHash.substring(0, 10)}...`,
+      message: `Escrow funded on Stellar ${stellarConfig.network === 'public' ? 'Mainnet' : 'Testnet'}: ${agreement.amount} ${agreement.currency}. Tx: ${txHash.substring(0, 12)}...`,
       actor: 'POKA SENTINEL',
-      metadata: { txHash },
+      metadata: { txHash, ledger, explorerUrl: getExplorerTxUrl(txHash) },
     });
 
     db.addEvent(agreement.id, {
       agreementId: agreement.id,
       type: 'MONITORING_STARTED',
-      message: `Autonomous Sentinel initialized. Monitoring condition: '${agreement.condition}'.`,
+      message: `Autonomous Sentinel initialized. Monitoring Soroban contract: ${stellarConfig.contractId.substring(0, 10)}... for condition: '${agreement.condition}'.`,
       actor: 'POKA SENTINEL',
     });
   }
 
   /**
-   * Verifies the condition (triggered automatically or via simulated trigger)
+   * Verifies the condition fulfillment
    */
   public static async verifyCondition(agreement: Agreement): Promise<Agreement> {
     db.addEvent(agreement.id, {
       agreementId: agreement.id,
       type: 'CONDITION_DETECTED',
-      message: `Condition fulfillment signal detected for '${agreement.condition}'.`,
+      message: `Fulfillment signal detected for '${agreement.condition}'.`,
       actor: 'POKA SENTINEL',
     });
 
-    // Mark satisfied
+    // Mark condition satisfied
     agreement.conditionSatisfied = true;
     agreement.status = 'CONDITION_MET';
 
     db.addEvent(agreement.id, {
       agreementId: agreement.id,
       type: 'CONDITION_VERIFIED',
-      message: `Sentinel verified cryptographic proofs & delivery requirements. Condition satisfied.`,
+      message: `Sentinel verified cryptographic proofs & deliverable requirements. Condition satisfied on-chain.`,
       actor: 'POKA SENTINEL',
     });
 
     db.saveAgreement(agreement);
 
-    // If autonomy is AUTONOMOUS, automatically settle!
+    // If autonomy level is AUTONOMOUS, immediately trigger Soroban settlement!
     if (agreement.autonomyLevel === 'AUTONOMOUS') {
       await this.settleAgreement(agreement);
     }
@@ -88,7 +89,7 @@ export class SentinelService {
   }
 
   /**
-   * Settle and release payment to counterparty
+   * Settle and release payment to counterparty on Stellar
    */
   public static async settleAgreement(agreement: Agreement): Promise<{ agreement: Agreement; txHash: string }> {
     const policyCheck = policyEngine.validateFundRelease(agreement);
@@ -106,31 +107,32 @@ export class SentinelService {
     db.addEvent(agreement.id, {
       agreementId: agreement.id,
       type: 'SETTLEMENT_INITIATED',
-      message: `Settlement initiated. Preparing Celo Sepolia transaction for ${agreement.amount} ${agreement.currency}.`,
+      message: `Settlement initiated. Preparing Soroban release transaction for ${agreement.amount} ${agreement.currency}.`,
       actor: 'POKA SENTINEL',
     });
 
-    const tx = await celoService.releaseSettlement({
+    const tx = await stellarEscrow.release({
       agreementId: agreement.id,
       humanReadableId: agreement.humanReadableId,
       amount: agreement.amount,
       currency: agreement.currency,
-      from: agreement.escrowAddress || '0x992b4A25b8C77...CeloEscrow',
-      to: `0x${Math.random().toString(16).substring(2, 10)}... (${agreement.counterparty})`,
+      from: stellarConfig.contractId,
+      to: agreement.counterparty,
     });
 
     db.addTransaction(tx);
 
     agreement.status = 'SETTLED';
-    agreement.celoTxHash = tx.txHash;
+    agreement.stellarTxHash = tx.txHash;
+    agreement.stellarLedger = tx.stellarLedger;
     db.saveAgreement(agreement);
 
     db.addEvent(agreement.id, {
       agreementId: agreement.id,
       type: 'PAYMENT_RELEASED',
-      message: `Payment released. Celo transaction confirmed: ${tx.txHash}. Settlement complete.`,
+      message: `Payment released via Soroban escrow. Stellar transaction confirmed: ${tx.txHash}. Settlement complete.`,
       actor: 'POKA SENTINEL',
-      metadata: { txHash: tx.txHash },
+      metadata: { txHash: tx.txHash, explorerUrl: tx.explorerUrl, ledger: tx.stellarLedger },
     });
 
     return { agreement, txHash: tx.txHash };

@@ -10,7 +10,7 @@ agentsRouter.get('/', (_req, res) => {
       name: 'POKA Buyer Agent',
       type: 'autonomous_delegated',
       status: 'ONLINE',
-      address: '0x71C849B31A892F13210',
+      address: 'GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5',
       reputation: 99.4,
       role: 'buyer',
       activeAgreements: 2,
@@ -20,7 +20,7 @@ agentsRouter.get('/', (_req, res) => {
       name: 'David Autonomous Agent',
       type: 'counterparty_delegated',
       status: 'ONLINE',
-      address: '0x48911A7208C39F290B3',
+      address: 'GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ',
       reputation: 98.1,
       role: 'seller',
       activeAgreements: 1,
@@ -30,17 +30,17 @@ agentsRouter.get('/', (_req, res) => {
       name: 'Research Agent Alpha',
       type: 'autonomous_delegated',
       status: 'ONLINE',
-      address: '0x7F941A9908B763198',
+      address: 'GCLY7B3JNXU7M2K5P4A9B1C3D5E7F9G1H3J5K7L9M1N3P5Q7R9S1T3U5',
       reputation: 99.8,
       role: 'buyer',
       activeAgreements: 1,
     },
     {
       id: 'agent-data',
-      name: 'Decentralized Data Oracle',
+      name: 'Stellar Data Oracle Agent',
       type: 'autonomous_delegated',
       status: 'ONLINE',
-      address: '0x3E190C9148E66219',
+      address: 'GAKF5M7N9P1Q3R5S7T9U1V3W5X7Y9Z1A3B5C7D9E1F3G5H7J9K1L3M5N',
       reputation: 100.0,
       role: 'seller',
       activeAgreements: 1,
@@ -49,7 +49,7 @@ agentsRouter.get('/', (_req, res) => {
 });
 
 agentsRouter.post('/simulate-negotiation', (req, res) => {
-  const { amount = 50, condition = 'Website delivered', deadline = '24 Hours' } = req.body;
-  const result = AgentNegotiator.simulateNegotiation(amount, condition, deadline);
+  const { amount = 50, condition = 'Website delivered', deadline = '24 Hours', currency = 'USDC' } = req.body;
+  const result = AgentNegotiator.simulateNegotiation(amount, condition, deadline, currency);
   res.json(result);
 });

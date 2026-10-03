@@ -1,9 +1,9 @@
 import { PolicyPermissions, Agreement } from '../../types/shared.js';
 
-// Standard MVP Policy limits
+// Standard MVP Policy limits on Stellar
 export const DEFAULT_POLICY: PolicyPermissions = {
-  maxTransaction: 100, // $100 maximum single transaction without human override
-  maxNegotiation: 75,  // $75 maximum auto-negotiated settlement
+  maxTransaction: 100, // 100 USDC / 500 XLM max single transaction without human override
+  maxNegotiation: 75,  // 75 USDC maximum auto-negotiated settlement
   canRequestExtension: true,
   canNegotiate: true,
   canReleaseFunds: true,
@@ -30,7 +30,7 @@ export class PolicyEngine {
     if (!counterparty || counterparty.trim().length === 0) {
       return {
         allowed: false,
-        reason: 'Counterparty identifier cannot be empty.',
+        reason: 'Counterparty identifier or Stellar public key cannot be empty.',
         policy: this.policy,
       };
     }
@@ -46,7 +46,7 @@ export class PolicyEngine {
     if (amount > 10000) {
       return {
         allowed: false,
-        reason: `Amount exceeds hard cap of $10,000 for autonomous escrow creation.`,
+        reason: `Amount exceeds hard cap of 10,000 for autonomous escrow creation.`,
         policy: this.policy,
       };
     }
@@ -66,7 +66,7 @@ export class PolicyEngine {
     if (proposedAmount > this.policy.maxNegotiation) {
       return {
         allowed: false,
-        reason: `Negotiated amount $${proposedAmount} exceeds autonomous ceiling of $${this.policy.maxNegotiation}. Human approval required.`,
+        reason: `Negotiated amount ${proposedAmount} exceeds autonomous ceiling of ${this.policy.maxNegotiation}. Human approval required.`,
         policy: this.policy,
       };
     }
@@ -78,7 +78,7 @@ export class PolicyEngine {
     if (!agreement.escrowFunded) {
       return {
         allowed: false,
-        reason: 'Escrow has not been funded yet.',
+        reason: 'Soroban escrow has not been funded yet.',
         policy: this.policy,
       };
     }
@@ -94,7 +94,7 @@ export class PolicyEngine {
     if (agreement.amount > this.policy.maxTransaction) {
       return {
         allowed: false,
-        reason: `Amount ($${agreement.amount}) exceeds policy limit ($${this.policy.maxTransaction}). Requires manual approval.`,
+        reason: `Amount (${agreement.amount} ${agreement.currency}) exceeds autonomous policy limit (${this.policy.maxTransaction}). Requires manual approval.`,
         policy: this.policy,
       };
     }
