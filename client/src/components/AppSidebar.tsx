@@ -29,6 +29,8 @@ interface AppSidebarProps {
   onNewAgreement: () => void;
   collapsed: boolean;
   onToggleCollapse: () => void;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
 export const AppSidebar: React.FC<AppSidebarProps> = ({
@@ -38,6 +40,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   onNewAgreement,
   collapsed,
   onToggleCollapse,
+  mobileOpen = false,
+  onCloseMobile,
 }) => {
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -64,16 +68,40 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     return () => unsubscribe();
   }, []);
 
+  const handleNavClick = (tab: 'landing' | 'home' | 'agreements' | 'negotiation' | 'activity') => {
+    onNavigate(tab);
+    if (onCloseMobile) onCloseMobile();
+  };
+
+  const handleSelectAgr = (id: string) => {
+    onSelectAgreement(id);
+    if (onCloseMobile) onCloseMobile();
+  };
+
+  const handleNewAgr = () => {
+    onNewAgreement();
+    if (onCloseMobile) onCloseMobile();
+  };
+
   const displayAddress = walletAddress
     ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}`
     : 'Connect Wallet';
 
   return (
-    <aside
-      className={`h-screen bg-[#0A0A0E] border-r border-[#1E1E28] flex flex-col justify-between transition-all duration-300 select-none z-30 ${
-        collapsed ? 'w-16' : 'w-64'
-      }`}
-    >
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-30 md:hidden animate-in fade-in"
+          onClick={onCloseMobile}
+        />
+      )}
+
+      <aside
+        className={`fixed md:relative inset-y-0 left-0 h-screen bg-[#0A0A0E] border-r border-[#1E1E28] flex flex-col justify-between transition-all duration-300 select-none z-40 ${
+          mobileOpen ? 'translate-x-0 w-64 shadow-2xl' : '-translate-x-full md:translate-x-0'
+        } ${collapsed ? 'md:w-16' : 'md:w-64'}`}
+      >
       {/* Top Header & New Button */}
       <div className="p-3">
         {/* Brand & Collapse Toggle */}
@@ -123,7 +151,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         {/* Primary App Navigation */}
         <nav className="space-y-1 font-mono text-xs">
           <button
-            onClick={() => onNavigate('home')}
+            onClick={() => handleNavClick('home')}
             className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-lg transition-all text-left ${
               currentTab === 'home' || currentTab === 'create'
                 ? 'bg-[#1E1E28] text-[#00FF66] font-semibold border border-[#00FF66]/20'
@@ -136,7 +164,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           </button>
 
           <button
-            onClick={() => onNavigate('agreements')}
+            onClick={() => handleNavClick('agreements')}
             className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-lg transition-all text-left ${
               currentTab === 'activity'
                 ? 'bg-[#1E1E28] text-[#F3F3F6] font-semibold border border-[#2E2E3C]'
@@ -149,7 +177,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           </button>
 
           <button
-            onClick={() => onNavigate('negotiation')}
+            onClick={() => handleNavClick('negotiation')}
             className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-lg transition-all text-left ${
               currentTab === 'negotiation'
                 ? 'bg-[#1E1E28] text-[#00FF66] font-semibold border border-[#00FF66]/20'
@@ -178,7 +206,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               return (
                 <button
                   key={agr.id}
-                  onClick={() => onSelectAgreement(agr.id)}
+                  onClick={() => handleSelectAgr(agr.id)}
                   className={`w-full text-left px-2 py-1.5 rounded text-[11px] font-mono transition-colors flex items-center justify-between group ${
                     currentTab === 'detail'
                       ? 'bg-[#121217] text-[#F3F3F6]'
@@ -214,7 +242,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       <div className="p-3 border-t border-[#1E1E28] bg-[#0A0A0E] space-y-2">
         {/* Back to Marketing Website */}
         <button
-          onClick={() => onNavigate('landing')}
+          onClick={() => handleNavClick('landing')}
           className={`w-full flex items-center space-x-2 px-2.5 py-1.5 rounded text-xs font-mono text-[#848494] hover:text-[#00FF66] hover:bg-[#121217] transition-colors ${
             collapsed ? 'justify-center px-0' : ''
           }`}
@@ -270,5 +298,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         activeWalletId={walletId}
       />
     </aside>
+  </>
   );
 };

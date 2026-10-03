@@ -12,12 +12,48 @@ import { NegotiationPage } from './pages/NegotiationPage';
 import { ActivityPage } from './pages/ActivityPage';
 import { api } from './lib/api';
 
+type TabType = 'landing' | 'home' | 'create' | 'detail' | 'negotiation' | 'activity';
+
+const getInitialTabFromUrl = (): TabType => {
+  if (typeof window === 'undefined') return 'landing';
+  const path = window.location.pathname.toLowerCase();
+  if (path === '/app/agreements' || path === '/app/activity') return 'activity';
+  if (path === '/app/negotiation') return 'negotiation';
+  if (path.startsWith('/app')) return 'home';
+  return 'landing';
+};
+
 export function App() {
-  const [currentTab, setCurrentTab] = useState<'landing' | 'home' | 'create' | 'detail' | 'negotiation' | 'activity'>('landing');
+  const [currentTab, setCurrentTab] = useState<TabType>(getInitialTabFromUrl);
   const [parsedData, setParsedData] = useState<ParsedAgreementInput | null>(null);
   const [selectedAgreementId, setSelectedAgreementId] = useState<string | null>(null);
   const [sentinelStatus, setSentinelStatus] = useState<SentinelStatus | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false);
+
+  // Sync browser URL whenever currentTab changes
+  const updateTabAndUrl = (tab: TabType) => {
+    setCurrentTab(tab);
+    let targetPath = '/';
+    if (tab === 'home' || tab === 'create') targetPath = '/app';
+    else if (tab === 'activity' || tab === 'detail') targetPath = '/app/agreements';
+    else if (tab === 'negotiation') targetPath = '/app/negotiation';
+    else targetPath = '/';
+
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, '', targetPath);
+    }
+  };
+
+  // Listen to browser Back/Forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const tab = getInitialTabFromUrl();
+      setCurrentTab(tab);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Poll Sentinel status periodically
   const fetchStatus = async () => {
@@ -37,39 +73,48 @@ export function App() {
 
   const handleParsed = (parsed: ParsedAgreementInput) => {
     setParsedData(parsed);
-    setCurrentTab('create');
+    updateTabAndUrl('create');
   };
 
   const handleTestPrompt = async (prompt: string) => {
     try {
       const parsed = await api.parseAgreement(prompt);
       setParsedData(parsed);
-      setCurrentTab('create');
+      updateTabAndUrl('create');
     } catch {
-      setCurrentTab('home');
+      updateTabAndUrl('home');
     }
   };
 
   const handleAgreementCreated = (agreement: Agreement) => {
     setSelectedAgreementId(agreement.id);
-    setCurrentTab('detail');
+    updateTabAndUrl('detail');
     fetchStatus();
   };
 
   const handleSelectAgreement = (id: string) => {
     setSelectedAgreementId(id);
-    setCurrentTab('detail');
+    updateTabAndUrl('detail');
   };
 
   const handleNavigate = (tab: 'landing' | 'home' | 'agreements' | 'negotiation' | 'activity') => {
     if (tab === 'agreements') {
-      setCurrentTab('activity');
+      updateTabAndUrl('activity');
     } else {
-      setCurrentTab(tab);
+      updateTabAndUrl(tab);
+    }
+    setMobileSidebarOpen(false);
+  };
+
+  const handleToggleSidebar = () => {
+    if (window.innerWidth < 768) {
+      setMobileSidebarOpen(!mobileSidebarOpen);
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed);
     }
   };
 
-  // Case 1: Landing Page Mode (Public Marketing Website)
+  // Case 1: Landing Page Mode (Public Marketing Website at "/")
   if (currentTab === 'landing') {
     return (
       <div className="min-h-screen bg-[#08080A] text-[#F3F3F6] selection:bg-[#00FF66]/20 selection:text-[#00FF66]">
@@ -78,24 +123,26 @@ export function App() {
           onNavigate={handleNavigate}
         />
         <MarketingPage
-          onLaunchApp={() => setCurrentTab('home')}
+          onLaunchApp={() => handleNavigate('home')}
           onTestPrompt={handleTestPrompt}
         />
       </div>
     );
   }
 
-  // Case 2: Product App Mode (ChatGPT-Style Side Navigation)
+  // Case 2: Product App Mode (at "/app" with ChatGPT-Style Navigation)
   return (
     <div className="flex h-screen bg-[#08080A] text-[#F3F3F6] overflow-hidden selection:bg-[#00FF66]/20 selection:text-[#00FF66]">
-      {/* Collapsible Left Side Nav */}
+      {/* Responsive Left Side Nav (Desktop collapsible / Mobile slide-over drawer) */}
       <AppSidebar
         currentTab={currentTab}
         onNavigate={handleNavigate}
         onSelectAgreement={handleSelectAgreement}
-        onNewAgreement={() => setCurrentTab('home')}
+        onNewAgreement={() => handleNavigate('home')}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        mobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
       />
 
       {/* Main Workspace Canvas */}
@@ -104,7 +151,7 @@ export function App() {
         <AppHeader
           currentTab={currentTab}
           selectedAgreementId={selectedAgreementId}
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onToggleSidebar={handleToggleSidebar}
           sentinelStatus={sentinelStatus}
         />
 
@@ -113,14 +160,14 @@ export function App() {
           {currentTab === 'home' && (
             <HomePage
               onParsed={handleParsed}
-              onOpenNegotiationDemo={() => setCurrentTab('negotiation')}
+              onOpenNegotiationDemo={() => handleNavigate('negotiation')}
             />
           )}
 
           {currentTab === 'create' && parsedData && (
             <CreateAgreementPage
               initialParsed={parsedData}
-              onBack={() => setCurrentTab('home')}
+              onBack={() => handleNavigate('home')}
               onAgreementCreated={handleAgreementCreated}
             />
           )}
@@ -128,10 +175,8 @@ export function App() {
           {currentTab === 'detail' && selectedAgreementId && (
             <AgreementDetailPage
               agreementId={selectedAgreementId}
-              onBack={() => setCurrentTab('activity')}
-              onOpenNegotiation={() => {
-                setCurrentTab('negotiation');
-              }}
+              onBack={() => handleNavigate('agreements')}
+              onOpenNegotiation={() => handleNavigate('negotiation')}
             />
           )}
 

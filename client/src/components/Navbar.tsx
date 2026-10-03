@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Terminal, ArrowRight, Cpu, Wallet, CheckCircle2, Loader2, ArrowLeft, ExternalLink, Code2 } from 'lucide-react';
+import {
+  Shield,
+  Terminal,
+  ArrowRight,
+  Cpu,
+  Wallet,
+  CheckCircle2,
+  Loader2,
+  ArrowLeft,
+  ExternalLink,
+  Code2,
+  Menu,
+  X
+} from 'lucide-react';
 import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
 import { WalletModal } from './WalletModal';
 
@@ -13,6 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [walletId, setWalletId] = useState<SupportedWalletId | null>(null);
   const [walletModalOpen, setWalletModalOpen] = useState<boolean>(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   const isLandingMode = currentTab === 'landing';
 
@@ -166,13 +180,23 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
 
           {/* If on Landing page, show glowing "Launch App" CTA button */}
           {isLandingMode ? (
-            <button
-              onClick={() => onNavigate('home')}
-              className="px-4 py-2 rounded bg-[#00FF66] hover:bg-[#00D154] text-[#08080A] font-bold text-xs uppercase tracking-wider font-mono transition-all shadow-[0_0_20px_rgba(0,255,102,0.25)] hover:shadow-[0_0_25px_rgba(0,255,102,0.4)] flex items-center space-x-1.5 cursor-pointer transform hover:-translate-y-0.5"
-            >
-              <span>Launch App</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => onNavigate('home')}
+                className="px-3.5 sm:px-4 py-2 rounded bg-[#00FF66] hover:bg-[#00D154] text-[#08080A] font-bold text-xs uppercase tracking-wider font-mono transition-all shadow-[0_0_20px_rgba(0,255,102,0.25)] hover:shadow-[0_0_25px_rgba(0,255,102,0.4)] flex items-center space-x-1.5 cursor-pointer transform hover:-translate-y-0.5"
+              >
+                <span>Launch App</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 rounded text-[#848494] hover:text-[#F3F3F6] hover:bg-[#121217] transition-colors"
+                aria-label="Toggle Navigation Menu"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5 text-[#00FF66]" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
           ) : (
             /* Wallet button in app */
             <button
@@ -195,6 +219,49 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
           )}
         </div>
       </div>
+
+      {/* Mobile Drawer Dropdown for Landing Page */}
+      {isLandingMode && mobileMenuOpen && (
+        <div className="md:hidden border-t border-[#1E1E28] bg-[#0A0A0E] px-4 py-3 space-y-2 font-mono text-xs animate-in slide-in-from-top-2">
+          <a
+            href="#about"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded text-[#848494] hover:text-[#F3F3F6] hover:bg-[#121217]"
+          >
+            About
+          </a>
+          <a
+            href="#features"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded text-[#848494] hover:text-[#F3F3F6] hover:bg-[#121217]"
+          >
+            Features
+          </a>
+          <a
+            href="#how-it-works"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded text-[#848494] hover:text-[#F3F3F6] hover:bg-[#121217]"
+          >
+            How It Works
+          </a>
+          <a
+            href="#docs"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded text-[#848494] hover:text-[#F3F3F6] hover:bg-[#121217]"
+          >
+            Docs
+          </a>
+          <a
+            href="https://github.com/spoo-vault/kofu"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center space-x-2 px-3 py-2 rounded text-[#848494] hover:text-[#00FF66] hover:bg-[#121217]"
+          >
+            <Code2 className="w-4 h-4" />
+            <span>GitHub Repository</span>
+          </a>
+        </div>
+      )}
 
       <WalletModal
         isOpen={walletModalOpen}
