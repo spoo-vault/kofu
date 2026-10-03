@@ -18,7 +18,7 @@ POKA is participating in **Drips Wave** and the **Stellar Community Fund (SCF)**
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/bits-agency/poka.git
+git clone https://github.com/spoo-vault/poka.git
 cd poka
 npm run install:all
 ```

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "tsx src/__tests__/policy.test.ts && tsx src/__tests__/parser.test.ts && tsx src/__tests__/stellar.test.ts"
   },
   "dependencies": {
     "@stellar/stellar-sdk": "^17.2.1",

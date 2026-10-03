@@ -131,4 +131,4 @@ GEMINI_API_KEY=
 - **SCF Build Award Proposal**: [docs/scf-proposal.md](file:///c:/Users/HP/bitsgo/poka/docs/scf-proposal.md)
 - **STRIDE Threat Model**: [docs/threat-model.md](file:///c:/Users/HP/bitsgo/poka/docs/threat-model.md)
 - **On-Chain Monitoring Plan**: [docs/monitoring-plan.md](file:///c:/Users/HP/bitsgo/poka/docs/monitoring-plan.md)
-- **Drips Wave Maintainer Issues**: [docs/drips-wave-issues.md](file:///c:/Users/HP/bitsgo/poka/docs/drips-wave-issues.md)
+- **Repository**: [https://github.com/spoo-vault/poka](https://github.com/spoo-vault/poka)

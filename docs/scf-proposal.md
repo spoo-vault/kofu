@@ -5,7 +5,7 @@
 * **Tagline**: Autonomous Economic Agreement Protocol on Stellar & Soroban
 * **Category**: AI & Autonomous Agents / Payments & Escrow Infrastructure
 * **Integration Track / Open Track**: Integration Track
-* **Repository**: [https://github.com/bits-agency/poka](https://github.com/bits-agency/poka)
+* **Repository**: [https://github.com/spoo-vault/poka](https://github.com/spoo-vault/poka)
 * **Demo URL**: [https://poka.vercel.app](https://poka.vercel.app)
 * **Target Network**: Stellar Mainnet (via Soroban Smart Contracts)
 * **Assets Supported**: Stellar Native XLM, Circle USDC, EURC
