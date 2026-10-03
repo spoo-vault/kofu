@@ -1,0 +1,19 @@
+name: 💡 Feature Request
+description: Suggest an idea or enhancement for POKA
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Use Case
+      description: What problem does this feature solve?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How should this be implemented on Stellar or Soroban?
+    validations:
+      required: true

@@ -1,0 +1,41 @@
+name: 🌊 Drips Wave Maintainer Task
+description: Bounty task for Drips Wave maintainers and contributors
+title: "[DRIPS]: "
+labels: ["drips-wave", "bounty", "stellar"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for picking up a POKA Drips Wave task! Please read the requirements below before starting work.
+  - type: input
+    id: task_id
+    attributes:
+      label: Drips Task Reference
+      description: Reference ID from docs/drips-wave-issues.md (e.g. ISSUE-02)
+      placeholder: "e.g. ISSUE-02"
+    validations:
+      required: true
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Task Difficulty
+      options:
+        - "Good First Issue (Beginner)"
+        - "Intermediate"
+        - "Advanced (Soroban / Core Engine)"
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Implementation Scope & Approach
+      description: Describe your proposed approach and target files.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria Checklist
+      description: List the testable criteria that will verify completion.
+    validations:
+      required: true
