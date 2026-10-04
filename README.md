@@ -133,6 +133,8 @@ GEMINI_API_KEY=
 ---
 
 ## 🛡️ Stellar Community Fund (SCF) & Security Standards
+- **Official App**: [https://kofu-stellar.web.app](https://kofu-stellar.web.app)
+- **Official X (Twitter)**: [@kofuapp (https://x.com/kofuapp)](https://x.com/kofuapp)
 - **SCF Build Award Proposal**: [docs/scf-proposal.md](./docs/scf-proposal.md)
 - **STRIDE Threat Model**: [docs/threat-model.md](./docs/threat-model.md)
 - **On-Chain Monitoring Plan**: [docs/monitoring-plan.md](./docs/monitoring-plan.md)

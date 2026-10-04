@@ -22,6 +22,12 @@ import {
 } from 'lucide-react';
 import { ParsedAgreementInput } from '@kofu/shared';
 
+const TwitterXIcon = ({ className = "w-3.5 h-3.5" }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" className={className}>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
 interface MarketingPageProps {
   onLaunchApp: () => void;
   onTestPrompt: (prompt: string) => void;
@@ -139,6 +145,17 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onLaunchApp, onTes
           >
             <Code2 className="w-4 h-4 text-[#00FF66]" />
             <span>GitHub Repository</span>
+            <ExternalLink className="w-3.5 h-3.5 text-[#848494]" />
+          </a>
+
+          <a
+            href="https://x.com/kofuapp"
+            target="_blank"
+            rel="noreferrer"
+            className="px-6 py-4 rounded-lg bg-[#121217] hover:bg-[#1A1A22] border border-[#1E1E28] hover:border-[#00FF66]/50 text-sm font-mono text-[#F3F3F6] transition-all flex items-center space-x-2 cursor-pointer group"
+          >
+            <TwitterXIcon className="w-4 h-4 text-[#F3F3F6] group-hover:text-[#00FF66] transition-colors" />
+            <span>@kofuapp</span>
             <ExternalLink className="w-3.5 h-3.5 text-[#848494]" />
           </a>
 
@@ -702,8 +719,20 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onLaunchApp, onTes
 
           {/* Col 3 */}
           <div className="space-y-3 font-mono text-xs">
-            <div className="font-bold text-[#F3F3F6] uppercase tracking-wider text-[11px]">Community</div>
+            <div className="font-bold text-[#F3F3F6] uppercase tracking-wider text-[11px]">Community &amp; Social</div>
             <ul className="space-y-2 text-[#848494]">
+              <li>
+                <a
+                  href="https://x.com/kofuapp"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-[#00FF66] flex items-center space-x-1.5 group"
+                >
+                  <TwitterXIcon className="w-3.5 h-3.5 text-[#F3F3F6] group-hover:text-[#00FF66] transition-colors" />
+                  <span>X (@kofuapp)</span>
+                  <ExternalLink className="w-3 h-3 text-[#505060]" />
+                </a>
+              </li>
               <li><a href="https://github.com/spoo-vault/kofu" target="_blank" rel="noreferrer" className="hover:text-[#00FF66]">GitHub Organization</a></li>
               <li><a href="https://stellar.org" target="_blank" rel="noreferrer" className="hover:text-[#00FF66]">Stellar Development Foundation</a></li>
               <li><a href="https://soroban.stellar.org" target="_blank" rel="noreferrer" className="hover:text-[#00FF66]">Soroban Smart Contracts</a></li>

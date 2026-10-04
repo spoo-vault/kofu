@@ -16,6 +16,12 @@ import {
 import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
 import { WalletModal } from './WalletModal';
 
+const TwitterXIcon = ({ className = "w-3.5 h-3.5" }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" className={className}>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
 interface NavbarProps {
   currentTab: 'landing' | 'home' | 'agreements' | 'create' | 'detail' | 'negotiation' | 'activity';
   onNavigate: (tab: 'landing' | 'home' | 'agreements' | 'negotiation' | 'activity') => void;
@@ -112,6 +118,16 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
               >
                 <Code2 className="w-3.5 h-3.5" />
                 <span>GitHub</span>
+              </a>
+              <a
+                href="https://x.com/kofuapp"
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1.5 text-[#848494] hover:text-[#00FF66] hover:bg-[#121217] rounded transition-all flex items-center space-x-1"
+                title="Follow KOFU on X (@kofuapp)"
+              >
+                <TwitterXIcon className="w-3.5 h-3.5" />
+                <span>@kofuapp</span>
               </a>
             </nav>
           ) : (
@@ -259,6 +275,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
           >
             <Code2 className="w-4 h-4" />
             <span>GitHub Repository</span>
+          </a>
+          <a
+            href="https://x.com/kofuapp"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center space-x-2 px-3 py-2 rounded text-[#848494] hover:text-[#00FF66] hover:bg-[#121217]"
+          >
+            <TwitterXIcon className="w-4 h-4" />
+            <span>X (@kofuapp)</span>
           </a>
         </div>
       )}
