@@ -16,21 +16,13 @@ import {
   stellarWalletService,
   SupportedWalletId,
 } from '../lib/stellarWallets';
-import { isConnected as isFreighterConnected } from '@stellar/freighter-api';
-import { isConnected as isLobstrConnected } from '@lobstrco/signer-extension-api';
+import { walletDetectionService, DetectedExtensions } from '../lib/walletDetection';
 
 interface WalletModalProps {
   isOpen: boolean;
   onClose: () => void;
   activeAddress: string | null;
   activeWalletId: SupportedWalletId | null;
-}
-
-interface InstalledStatus {
-  freighter: boolean;
-  lobstr: boolean;
-  xbull: boolean;
-  metamask: boolean;
 }
 
 export const WalletModal: React.FC<WalletModalProps> = ({
@@ -45,81 +37,24 @@ export const WalletModal: React.FC<WalletModalProps> = ({
   const [showHelp, setShowHelp] = useState<boolean>(false);
   const [faucetLoading, setFaucetLoading] = useState<boolean>(false);
   const [faucetDone, setFaucetDone] = useState<boolean>(false);
-  const [installed, setInstalled] = useState<InstalledStatus>({
+  const [installed, setInstalled] = useState<DetectedExtensions>({
     freighter: false,
     lobstr: false,
     xbull: false,
     metamask: false,
   });
 
-  // Detect REAL installed status from browser extensions
+  // Subscribe to real-time wallet extension detection
   useEffect(() => {
-    if (!isOpen) return;
+    const unsub = walletDetectionService.subscribe((status) => {
+      setInstalled(status);
+    });
 
-    let isMounted = true;
+    if (isOpen) {
+      walletDetectionService.probeAll();
+    }
 
-    const checkRealInstallation = async () => {
-      let isFreighter = false;
-      let isLobstr = false;
-      let isXbull = false;
-      let isMetaMask = false;
-
-      if (typeof window !== 'undefined') {
-        const win = window as any;
-
-        // 1. Freighter detection
-        try {
-          if (win.freighter || (win.stellar && win.stellar.provider === 'freighter')) {
-            isFreighter = true;
-          } else {
-            const res = await isFreighterConnected();
-            isFreighter = !res.error && res.isConnected;
-          }
-        } catch {
-          isFreighter = false;
-        }
-
-        // 2. LOBSTR detection
-        try {
-          if (win.lobstr) {
-            isLobstr = true;
-          } else {
-            isLobstr = await isLobstrConnected();
-          }
-        } catch {
-          isLobstr = false;
-        }
-
-        // 3. xBull detection
-        try {
-          isXbull = Boolean(win.xBullSDK || win.xbull);
-        } catch {
-          isXbull = false;
-        }
-
-        // 4. MetaMask detection
-        try {
-          isMetaMask = Boolean(win.ethereum?.isMetaMask);
-        } catch {
-          isMetaMask = false;
-        }
-      }
-
-      if (isMounted) {
-        setInstalled({
-          freighter: isFreighter,
-          lobstr: isLobstr,
-          xbull: isXbull,
-          metamask: isMetaMask,
-        });
-      }
-    };
-
-    checkRealInstallation();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => unsub();
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -183,8 +118,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({
       name: 'Freighter',
       iconUrl: '/wallets/freighter.png',
       isInstalled: installed.freighter,
-      badgeText: installed.freighter ? 'INSTALLED' : undefined,
-      badgeStyle: 'installed',
+      badgeText: installed.freighter ? 'INSTALLED' : 'POPULAR',
+      badgeStyle: installed.freighter ? 'installed' : 'popular',
       fallbackText: 'Stellar & Soroban extension',
     },
     {
@@ -192,27 +127,27 @@ export const WalletModal: React.FC<WalletModalProps> = ({
       name: 'LOBSTR',
       iconUrl: '/wallets/lobstr.png',
       isInstalled: installed.lobstr,
-      badgeText: installed.lobstr ? 'INSTALLED' : 'POPULAR',
+      badgeText: installed.lobstr ? 'INSTALLED' : 'MOBILE & WEB',
       badgeStyle: installed.lobstr ? 'installed' : 'neutral',
       fallbackText: 'Mobile & Web signer',
+    },
+    {
+      id: 'albedo',
+      name: 'Albedo',
+      iconUrl: '/wallets/albedo.png',
+      isInstalled: true, // Albedo is web-based, zero install needed
+      badgeText: 'WEB SIGNER',
+      badgeStyle: 'web',
+      fallbackText: 'Instant popup (no install)',
     },
     {
       id: 'xbull',
       name: 'xBull',
       iconUrl: '/wallets/xbull.png',
       isInstalled: installed.xbull,
-      badgeText: installed.xbull ? 'INSTALLED' : undefined,
-      badgeStyle: 'installed',
+      badgeText: installed.xbull ? 'INSTALLED' : 'EXTENSION',
+      badgeStyle: installed.xbull ? 'installed' : 'neutral',
       fallbackText: 'Cross-platform power wallet',
-    },
-    {
-      id: 'albedo',
-      name: 'Albedo',
-      iconUrl: '/wallets/albedo.png',
-      isInstalled: false, // Albedo is web-based, zero install needed
-      badgeText: 'WEB SIGNER',
-      badgeStyle: 'web',
-      fallbackText: 'Instant popup (no install)',
     },
     {
       id: 'metamask',
@@ -419,6 +354,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                             className={`text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
                               w.badgeStyle === 'installed'
                                 ? 'bg-[#0E3320] text-[#00FF66] border border-[#00FF66]/25'
+                                : w.badgeStyle === 'popular'
+                                ? 'bg-[#132A4A] text-[#38BDF8] border border-[#38BDF8]/25'
                                 : w.badgeStyle === 'web'
                                 ? 'bg-[#2E1E4D] text-[#C084FC] border border-[#C084FC]/25'
                                 : w.badgeStyle === 'snap'

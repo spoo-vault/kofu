@@ -3,6 +3,11 @@ import { FreighterModule } from '@creit.tech/stellar-wallets-kit/modules/freight
 import { LobstrModule } from '@creit.tech/stellar-wallets-kit/modules/lobstr';
 import { xBullModule } from '@creit.tech/stellar-wallets-kit/modules/xbull';
 import { AlbedoModule } from '@creit.tech/stellar-wallets-kit/modules/albedo';
+import {
+  requestAccess as requestFreighterAccess,
+  getAddress as getFreighterAddress,
+  signTransaction as signFreighterTransaction,
+} from '@stellar/freighter-api';
 
 export type SupportedWalletId = 'freighter' | 'lobstr' | 'xbull' | 'albedo' | 'agent';
 
@@ -176,6 +181,18 @@ class StellarWalletService {
       return { address: agentKey, walletId: 'agent' };
     }
 
+    if (walletId === 'freighter') {
+      try {
+        const access = await requestFreighterAccess();
+        if (access?.address && !access.error) {
+          this.setConnected(access.address, 'freighter');
+          return { address: access.address, walletId: 'freighter' };
+        }
+      } catch (fErr) {
+        console.warn('Direct Freighter requestAccess notice, attempting StellarWalletsKit:', fErr);
+      }
+    }
+
     try {
       StellarWalletsKit.setWallet(walletId);
       const res = await StellarWalletsKit.getAddress();
@@ -222,6 +239,19 @@ class StellarWalletService {
     if (this.currentWallet === 'agent') {
       // Synthetic signature for simulated agent transactions
       return { signedTxXdr: xdr };
+    }
+
+    if (this.currentWallet === 'freighter') {
+      try {
+        const fRes = await signFreighterTransaction(xdr, {
+          networkPassphrase: Networks.TESTNET,
+        });
+        if (fRes?.signedTxXdr && !fRes.error) {
+          return { signedTxXdr: fRes.signedTxXdr };
+        }
+      } catch (fErr) {
+        console.warn('Direct Freighter signTransaction notice, trying Kit fallback:', fErr);
+      }
     }
 
     try {
