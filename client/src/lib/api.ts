@@ -1,5 +1,6 @@
 import { Agreement, AgreementEvent, Transaction, SentinelStatus, ParsedAgreementInput } from '@kofu/shared';
 import { FirestoreService } from './firestoreService';
+import { stellarWalletService } from './stellarWallets';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -170,10 +171,11 @@ export const api = {
 
     const list = getStoredAgreements();
     const num = String(list.length + 1).padStart(3, '0');
+    const connectedWallet = stellarWalletService.getAddress();
     const newAgr: Agreement = {
       id: `kofu-${Date.now()}`,
       humanReadableId: `KOFU-${num}`,
-      initiator: data.initiator || 'GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5',
+      initiator: data.initiator || connectedWallet || 'GBFOWEYQWBD6QSKBXMAXY2JFRDD7XAEZXHWFWXHQYK374M3YEWJYIQWQ',
       counterparty: data.counterparty || 'David',
       counterpartyType: data.counterpartyType || 'human',
       amount: data.amount || 50,

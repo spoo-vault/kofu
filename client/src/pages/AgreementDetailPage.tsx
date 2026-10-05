@@ -115,54 +115,42 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
     try {
       const isRealBrowserWallet = walletId && walletId !== 'agent';
       if (isRealBrowserWallet) {
-        try {
-          // Attempt real on-chain Soroban deposit via connected wallet popup
-          const onChainResult = await SorobanEscrowClient.fundEscrowOnChain(agreement);
-          const updatedAgr: Agreement = {
-            ...agreement,
-            status: 'ESCROWED',
-            escrowFunded: true,
-            stellarTxHash: onChainResult.txHash,
-            updatedAt: new Date().toISOString(),
-          };
-          setAgreement(updatedAgr);
-          await FirestoreService.saveAgreement(updatedAgr);
-          await FirestoreService.logEvent({
-            id: `ev-${Date.now()}`,
-            agreementId: agreement.id,
-            type: 'SOROBAN_LOCKBOX_SECURED',
-            message: `Escrow funded on Soroban contract CAXN...SVJS. Ledger: ${onChainResult.ledger || 'confirmed'}. Tx: ${onChainResult.txHash}`,
-            timestamp: updatedAgr.updatedAt,
-            actor: 'STELLAR_NETWORK',
-          });
-          return;
-        } catch (chainErr: any) {
-          console.warn('Real on-chain signing notice:', chainErr);
-          if (
-            chainErr.message?.includes('User declined') ||
-            chainErr.message?.includes('reject') ||
-            chainErr.message?.includes('cancel')
-          ) {
-            setError(`Transaction rejected by wallet user: ${chainErr.message}`);
-            return;
-          }
-          if (
-            chainErr.message?.includes('HostError') ||
-            chainErr.message?.includes('WasmVm') ||
-            chainErr.message?.includes('balance')
-          ) {
-            setError(`Stellar Testnet notice: ${chainErr.message}. Ensure your wallet has testnet XLM/USDC or use Testnet Agent.`);
-            return;
-          }
-        }
+        // Attempt real on-chain Soroban deposit via connected wallet popup
+        const onChainResult = await SorobanEscrowClient.fundEscrowOnChain(agreement);
+        const updatedAgr: Agreement = {
+          ...agreement,
+          status: 'ESCROWED',
+          escrowFunded: true,
+          stellarTxHash: onChainResult.txHash,
+          updatedAt: new Date().toISOString(),
+        };
+        setAgreement(updatedAgr);
+        await FirestoreService.saveAgreement(updatedAgr);
+        await FirestoreService.logEvent({
+          id: `ev-${Date.now()}`,
+          agreementId: agreement.id,
+          type: 'SOROBAN_LOCKBOX_SECURED',
+          message: `Escrow funded on Soroban contract CAXN...SVJS. Ledger: ${onChainResult.ledger || 'confirmed'}. Tx: ${onChainResult.txHash}`,
+          timestamp: updatedAgr.updatedAt,
+          actor: 'STELLAR_NETWORK',
+        });
+        return;
       }
 
-      // Fallback to backend / synthetic agent escrow
+      // Fallback for synthetic Testnet Agent
       const res = await api.fundEscrow(agreement.id);
       setAgreement(res.agreement);
       setEvents(res.events);
     } catch (err: any) {
-      setError(err.message || 'Failed to fund escrow');
+      console.error('Real on-chain escrow funding error:', err);
+      const msg = err?.message || 'Failed to fund escrow on Stellar Testnet';
+      if (msg.includes('declined') || msg.includes('cancel') || msg.includes('reject')) {
+        setError('Transaction signature was cancelled in your wallet.');
+      } else if (msg.includes('balance') || msg.includes('underfunded')) {
+        setError(`Insufficient balance on Stellar Testnet. Please request Friendbot XLM from the wallet menu.`);
+      } else {
+        setError(`Stellar Testnet Notice: ${msg}`);
+      }
     } finally {
       setActionLoading(false);
     }
@@ -188,11 +176,40 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
     setActionLoading(true);
     setError(null);
     try {
+      const isRealBrowserWallet = walletId && walletId !== 'agent';
+      if (isRealBrowserWallet) {
+        // Real on-chain Soroban settle call
+        const settleRes = await SorobanEscrowClient.settleEscrowOnChain(agreement);
+        const updatedAgr: Agreement = {
+          ...agreement,
+          status: 'SETTLED',
+          stellarTxHash: settleRes.txHash,
+          updatedAt: new Date().toISOString(),
+        };
+        setAgreement(updatedAgr);
+        await FirestoreService.saveAgreement(updatedAgr);
+        await FirestoreService.logEvent({
+          id: `ev-${Date.now()}`,
+          agreementId: agreement.id,
+          type: 'SETTLEMENT_RELEASED',
+          message: `Settlement released on-chain via Soroban. Ledger: ${settleRes.ledger || 'confirmed'}. Tx: ${settleRes.txHash}`,
+          timestamp: updatedAgr.updatedAt,
+          actor: 'STELLAR_NETWORK',
+        });
+        return;
+      }
+
       const res = await api.releaseSettlement(agreement.id);
       setAgreement(res.agreement);
       setEvents(res.events);
     } catch (err: any) {
-      setError(err.message || 'Failed to release payment');
+      console.error('Real on-chain settlement release error:', err);
+      const msg = err?.message || 'Failed to release payment on Stellar Testnet';
+      if (msg.includes('declined') || msg.includes('cancel') || msg.includes('reject')) {
+        setError('Transaction signature was cancelled in your wallet.');
+      } else {
+        setError(`Stellar Testnet Settlement Notice: ${msg}`);
+      }
     } finally {
       setActionLoading(false);
     }
