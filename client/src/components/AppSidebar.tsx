@@ -50,18 +50,16 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const [walletModalOpen, setWalletModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    // 1. Listen to live real-time Firestore updates
+    // 1. Listen to live real-time Firestore updates (scoped to wallet if connected)
     const unsubFirestore = FirestoreService.subscribeAgreements((liveList) => {
-      if (liveList && liveList.length > 0) {
-        setAgreements(liveList);
-      }
-    });
+      setAgreements(liveList);
+    }, walletAddress);
 
     // 2. Fetch initial list as fallback
     const loadAgreements = async () => {
       try {
-        const list = await api.getAgreements();
-        setAgreements((prev) => (prev.length > 0 ? prev : list));
+        const list = await api.getAgreements(walletAddress || undefined);
+        setAgreements(list);
       } catch {
         // Fallback handled in api
       }
@@ -71,7 +69,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     return () => {
       if (unsubFirestore) unsubFirestore();
     };
-  }, [currentTab]);
+  }, [currentTab, walletAddress]);
 
   useEffect(() => {
     const unsubscribe = stellarWalletService.subscribe((address, wid) => {
@@ -213,40 +211,52 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           </div>
 
           <div className="space-y-0.5">
-            {agreements.map((agr) => {
-              const isSettled = agr.status === 'SETTLED';
-              const isFunded = agr.escrowFunded;
-              return (
+            {agreements.length === 0 ? (
+              <div className="py-6 px-2 text-center space-y-2">
+                <p className="text-[11px] text-[#505060]">No escrows created yet</p>
                 <button
-                  key={agr.id}
-                  onClick={() => handleSelectAgr(agr.id)}
-                  className={`w-full text-left px-2 py-1.5 rounded text-[11px] font-mono transition-colors flex items-center justify-between group ${
-                    currentTab === 'detail'
-                      ? 'bg-[#121217] text-[#F3F3F6]'
-                      : 'text-[#848494] hover:text-[#F3F3F6] hover:bg-[#121217]/60'
-                  }`}
+                  onClick={onNewAgreement}
+                  className="text-[10px] text-[#00FF66] hover:underline font-semibold"
                 >
-                  <div className="flex items-center space-x-2 truncate">
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                        isSettled
-                          ? 'bg-[#00FF66]'
-                          : isFunded
-                          ? 'bg-[#FFB800]'
-                          : 'bg-[#505060]'
-                      }`}
-                    />
-                    <span className="font-semibold text-[#F3F3F6]">{agr.humanReadableId}</span>
-                    <span className="truncate text-[#848494] group-hover:text-[#F3F3F6] text-[10px]">
-                      {agr.condition}
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-[#505060] shrink-0 pl-1 font-mono">
-                    ${agr.amount}
-                  </span>
+                  + Create agreement
                 </button>
-              );
-            })}
+              </div>
+            ) : (
+              agreements.map((agr) => {
+                const isSettled = agr.status === 'SETTLED';
+                const isFunded = agr.escrowFunded;
+                return (
+                  <button
+                    key={agr.id}
+                    onClick={() => handleSelectAgr(agr.id)}
+                    className={`w-full text-left px-2 py-1.5 rounded text-[11px] font-mono transition-colors flex items-center justify-between group ${
+                      currentTab === 'detail'
+                        ? 'bg-[#121217] text-[#F3F3F6]'
+                        : 'text-[#848494] hover:text-[#F3F3F6] hover:bg-[#121217]/60'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2 truncate">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                          isSettled
+                            ? 'bg-[#00FF66]'
+                            : isFunded
+                            ? 'bg-[#FFB800]'
+                            : 'bg-[#505060]'
+                        }`}
+                      />
+                      <span className="font-semibold text-[#F3F3F6]">{agr.humanReadableId}</span>
+                      <span className="truncate text-[#848494] group-hover:text-[#F3F3F6] text-[10px]">
+                        {agr.condition}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-[#505060] shrink-0 pl-1 font-mono">
+                      ${agr.amount}
+                    </span>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
       )}

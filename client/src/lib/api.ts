@@ -4,67 +4,38 @@ import { stellarWalletService } from './stellarWallets';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
-// Demo / Offline Storage fallback
-const STORAGE_KEY = 'kofu_demo_agreements';
-
-const INITIAL_DEMO_AGREEMENTS: Agreement[] = [
-  {
-    id: 'kofu-1789658758725',
-    humanReadableId: 'KOFU-001',
-    initiator: 'GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5',
-    counterparty: 'David (GBZH7K...4A5)',
-    counterpartyType: 'human',
-    amount: 50,
-    currency: 'USDC',
-    condition: 'Website delivery and deployment on Vercel',
-    deadline: 'Tomorrow 5:00 PM UTC',
-    status: 'AGREED',
-    autonomyLevel: 'ASSISTED',
-    sorobanContractId: 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS',
-    escrowFunded: true,
-    conditionSatisfied: false,
-    stellarTxHash: 'a89c3b47f29e1208945cf43872931a0e834927b561cda08912ef09843615bcde',
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000).toISOString(),
-  },
-  {
-    id: 'kofu-1789659998124',
-    humanReadableId: 'KOFU-002',
-    initiator: 'GBZH7K5V6GZ6F5OXZXU7F5K7D2Z5H7A6C3Q7K2V5N6M8B4V2C1X3Z4A5',
-    counterparty: 'Research Agent (0x71C...49b)',
-    counterpartyType: 'agent',
-    amount: 25,
-    currency: 'USDC',
-    condition: 'Verified AI training dataset delivery with SHA-256 hash',
-    deadline: '2026-10-10',
-    status: 'SETTLED',
-    autonomyLevel: 'AUTONOMOUS',
-    sorobanContractId: 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS',
-    escrowFunded: true,
-    conditionSatisfied: true,
-    stellarTxHash: 'f451a9238bc4081efb984531204895ca7238bdf89421ea9834125b0981e2894a',
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 43200000).toISOString(),
-  }
-];
+// Local storage persistence for active agreements
+const STORAGE_KEY = 'kofu_live_agreements';
 
 function getStoredAgreements(): Agreement[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DEMO_AGREEMENTS));
-      return INITIAL_DEMO_AGREEMENTS;
+    // Purge legacy mock seed storage if present
+    if (typeof window !== 'undefined' && localStorage.getItem('kofu_demo_agreements')) {
+      localStorage.removeItem('kofu_demo_agreements');
     }
-    return JSON.parse(raw);
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    // Ensure no legacy dummy IDs remain
+    const filtered = parsed.filter(
+      (a: Agreement) => a.id !== 'kofu-1789658758725' && a.id !== 'kofu-1789659998124'
+    );
+    if (filtered.length !== parsed.length && typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    }
+    return filtered;
   } catch {
-    return INITIAL_DEMO_AGREEMENTS;
+    return [];
   }
 }
 
 function saveStoredAgreements(list: Agreement[]) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  } catch (e) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+  } catch {
     // Ignore storage errors
   }
 }
@@ -115,14 +86,30 @@ export const api = {
     };
   },
 
-  async getAgreements(): Promise<Agreement[]> {
+  async getAgreements(walletAddress?: string): Promise<Agreement[]> {
+    const activeWallet = walletAddress || stellarWalletService.getAddress();
     try {
       const res = await fetch(`${API_BASE}/agreements`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const list: Agreement[] = await res.json();
+        if (activeWallet) {
+          return list.filter(
+            (a) => a.initiator === activeWallet || (a.counterparty && a.counterparty.includes(activeWallet))
+          );
+        }
+        return list;
+      }
     } catch {
       // Fallback
     }
-    return getStoredAgreements();
+
+    const list = getStoredAgreements();
+    if (activeWallet) {
+      return list.filter(
+        (a) => a.initiator === activeWallet || (a.counterparty && a.counterparty.includes(activeWallet))
+      );
+    }
+    return list;
   },
 
   async getAgreement(id: string): Promise<{ agreement: Agreement; events: AgreementEvent[] }> {
@@ -133,24 +120,30 @@ export const api = {
       // Fallback
     }
 
+    // Try Cloud Firestore first
+    try {
+      const cloudAgr = await FirestoreService.getAgreement(id);
+      if (cloudAgr) {
+        return { agreement: cloudAgr, events: [] };
+      }
+    } catch {
+      // ignore
+    }
+
     const list = getStoredAgreements();
-    const agr = list.find((a) => a.id === id) || list[0];
+    const agr = list.find((a) => a.id === id);
+    if (!agr) {
+      throw new Error(`Agreement ${id} not found.`);
+    }
+
     const events: AgreementEvent[] = [
       {
         id: `ev-1`,
         agreementId: agr.id,
         type: 'AGREEMENT_INITIALIZED',
-        message: `KOFU escrow created with terms: ${agr.amount} ${agr.currency}.`,
+        message: `KOFU escrow created: ${agr.amount} ${agr.currency}.`,
         timestamp: agr.createdAt,
         actor: 'KOFU SENTINEL',
-      },
-      {
-        id: `ev-2`,
-        agreementId: agr.id,
-        type: 'SOROBAN_LOCKBOX_SECURED',
-        message: `Funds secured in Soroban smart contract (${agr.sorobanContractId || 'CDLZ...SC'}).`,
-        timestamp: agr.updatedAt,
-        actor: 'STELLAR_NETWORK',
       }
     ];
 
@@ -336,20 +329,31 @@ export const api = {
     return { agreement: list[idx] || list[0], txHash: hash, events: [] };
   },
 
-  async getTransactions(): Promise<Transaction[]> {
+  async getTransactions(walletAddress?: string): Promise<Transaction[]> {
+    const activeWallet = walletAddress || stellarWalletService.getAddress();
     try {
       const res = await fetch(`${API_BASE}/transactions`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const txs: Transaction[] = await res.json();
+        if (activeWallet) {
+          return txs.filter((t) => t.from === activeWallet || t.to === activeWallet);
+        }
+        return txs;
+      }
     } catch {
       // Fallback
     }
 
-    const list = getStoredAgreements();
-    return list.map((a, i) => ({
-      id: `tx-${i + 1}`,
+    const list = getStoredAgreements().filter((a) => a.escrowFunded && a.stellarTxHash);
+    const filtered = activeWallet
+      ? list.filter((a) => a.initiator === activeWallet || (a.counterparty && a.counterparty.includes(activeWallet)))
+      : list;
+
+    return filtered.map((a, i) => ({
+      id: `tx-${a.id}`,
       agreementId: a.id,
       humanReadableId: a.humanReadableId,
-      txHash: a.stellarTxHash || '8fa2b109e4c5...89',
+      txHash: a.stellarTxHash || '',
       chain: 'STELLAR_TESTNET',
       amount: a.amount,
       currency: a.currency,
@@ -358,8 +362,8 @@ export const api = {
       from: a.initiator,
       to: a.counterparty,
       createdAt: a.updatedAt,
-      stellarLedger: 1248910 + i * 15,
-      explorerUrl: `https://stellar.expert/explorer/testnet/tx/${a.stellarTxHash || ''}`
+      stellarLedger: 5027680 + i,
+      explorerUrl: `https://stellar.expert/explorer/testnet/tx/${a.stellarTxHash}`
     }));
   },
 
@@ -371,13 +375,16 @@ export const api = {
       // Fallback
     }
 
+    const list = getStoredAgreements().filter((a) => a.escrowFunded && a.status !== 'SETTLED');
+    const totalInEscrow = list.reduce((sum, a) => sum + (a.amount || 0), 0);
+
     return {
-      activeSentinelsCount: 4,
-      totalInEscrow: 75.0,
+      activeSentinelsCount: list.length,
+      totalInEscrow,
       currency: 'USDC',
       status: 'SYNCED',
       network: 'STELLAR_TESTNET',
-      currentLedger: 1249015,
+      currentLedger: 5027720,
       sorobanContractId: 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS',
     };
   },

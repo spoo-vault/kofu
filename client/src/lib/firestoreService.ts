@@ -77,8 +77,12 @@ export class FirestoreService {
   /**
    * Subscribe to real-time changes on all agreements
    */
+  /**
+   * Subscribe to real-time changes on agreements (optionally filtered by connected wallet)
+   */
   public static subscribeAgreements(
-    callback: (agreements: Agreement[]) => void
+    callback: (agreements: Agreement[]) => void,
+    walletAddress?: string | null
   ): Unsubscribe | null {
     if (!this.isAvailable()) return null;
     try {
@@ -88,7 +92,18 @@ export class FirestoreService {
         (snapshot) => {
           const list: Agreement[] = [];
           snapshot.forEach((d) => {
-            list.push(d.data() as Agreement);
+            const data = d.data() as Agreement;
+            // Filter out any legacy dummy seeds
+            if (data.id === 'kofu-1789658758725' || data.id === 'kofu-1789659998124') {
+              return;
+            }
+            if (
+              !walletAddress ||
+              data.initiator === walletAddress ||
+              (data.counterparty && data.counterparty.includes(walletAddress))
+            ) {
+              list.push(data);
+            }
           });
           // Sort client-side by createdAt descending
           list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

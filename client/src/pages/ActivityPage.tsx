@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Agreement, Transaction } from '@kofu/shared';
 import { api } from '../lib/api';
+import { FirestoreService } from '../lib/firestoreService';
+import { stellarWalletService } from '../lib/stellarWallets';
 import { Layers, ArrowRight, ExternalLink, ShieldCheck, CheckCircle2, Clock } from 'lucide-react';
 
 interface ActivityPageProps {
@@ -8,17 +10,31 @@ interface ActivityPageProps {
 }
 
 export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement }) => {
+  const [walletAddress, setWalletAddress] = useState<string | null>(stellarWalletService.getAddress());
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeView, setActiveView] = useState<'agreements' | 'transactions'>('agreements');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const unsubWallet = stellarWalletService.subscribe((addr) => {
+      setWalletAddress(addr);
+    });
+    return () => unsubWallet();
+  }, []);
+
+  useEffect(() => {
+    // 1. Real-time Firestore subscription scoped to wallet
+    const unsubFirestore = FirestoreService.subscribeAgreements((liveList) => {
+      setAgreements(liveList);
+    }, walletAddress);
+
+    // 2. Fetch transactions & initial agreements fallback
     const loadData = async () => {
       try {
         const [agrees, txs] = await Promise.all([
-          api.getAgreements(),
-          api.getTransactions(),
+          api.getAgreements(walletAddress || undefined),
+          api.getTransactions(walletAddress || undefined),
         ]);
         setAgreements(agrees);
         setTransactions(txs);
@@ -29,7 +45,11 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
       }
     };
     loadData();
-  }, []);
+
+    return () => {
+      if (unsubFirestore) unsubFirestore();
+    };
+  }, [walletAddress]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6 font-mono">
