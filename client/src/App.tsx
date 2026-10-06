@@ -14,6 +14,19 @@ import { api } from './lib/api';
 
 type TabType = 'landing' | 'home' | 'create' | 'detail' | 'negotiation' | 'activity';
 
+const DEFAULT_PARSED: ParsedAgreementInput = {
+  counterparty: 'David',
+  counterpartyType: 'human',
+  amount: 50,
+  currency: 'USDC',
+  condition: 'Website delivered and verified',
+  deadline: 'Tomorrow',
+  escrowRequired: true,
+  rawText: 'Pay David 50 USDC when website is delivered tomorrow',
+  confidence: 0.96,
+  autonomyLevel: 'ASSISTED',
+};
+
 const getInitialTabFromUrl = (): TabType => {
   if (typeof window === 'undefined') return 'landing';
   const path = window.location.pathname.toLowerCase();
@@ -97,7 +110,7 @@ export function App() {
     updateTabAndUrl('detail');
   };
 
-  const handleNavigate = (tab: 'landing' | 'home' | 'agreements' | 'negotiation' | 'activity') => {
+  const handleNavigate = (tab: 'landing' | 'home' | 'create' | 'agreements' | 'negotiation' | 'activity') => {
     if (tab === 'agreements') {
       updateTabAndUrl('activity');
     } else {
@@ -138,7 +151,7 @@ export function App() {
         currentTab={currentTab}
         onNavigate={handleNavigate}
         onSelectAgreement={handleSelectAgreement}
-        onNewAgreement={() => handleNavigate('home')}
+        onNewAgreement={() => handleNavigate('create')}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         mobileOpen={mobileSidebarOpen}
@@ -164,9 +177,9 @@ export function App() {
             />
           )}
 
-          {currentTab === 'create' && parsedData && (
+          {currentTab === 'create' && (
             <CreateAgreementPage
-              initialParsed={parsedData}
+              initialParsed={parsedData || DEFAULT_PARSED}
               onBack={() => handleNavigate('home')}
               onAgreementCreated={handleAgreementCreated}
             />

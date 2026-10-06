@@ -1,6 +1,7 @@
 import { Agreement, AgreementEvent, Transaction, SentinelStatus, ParsedAgreementInput } from '@kofu/shared';
 import { FirestoreService } from './firestoreService';
 import { stellarWalletService } from './stellarWallets';
+import { ClientGeminiService } from './geminiClient';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -50,7 +51,14 @@ export const api = {
       });
       if (res.ok) return await res.json();
     } catch {
-      // Fallback: Client-side Deterministic Regex Parser
+      // Backend unavailable; proceed to Gemini client
+    }
+
+    try {
+      const geminiResult = await ClientGeminiService.parseWithGemini(prompt);
+      if (geminiResult) return geminiResult;
+    } catch (geminiErr) {
+      console.warn('[Gemini Client] Direct call failed, using deterministic parser:', geminiErr);
     }
 
     // High accuracy fallback regex

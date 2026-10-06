@@ -25,7 +25,7 @@ import { api } from '../lib/api';
 
 interface AppSidebarProps {
   currentTab: 'home' | 'create' | 'detail' | 'negotiation' | 'activity';
-  onNavigate: (tab: 'landing' | 'home' | 'agreements' | 'negotiation' | 'activity') => void;
+  onNavigate: (tab: 'landing' | 'home' | 'create' | 'agreements' | 'negotiation' | 'activity') => void;
   onSelectAgreement: (id: string) => void;
   onNewAgreement: () => void;
   collapsed: boolean;
@@ -79,7 +79,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     return () => unsubscribe();
   }, []);
 
-  const handleNavClick = (tab: 'landing' | 'home' | 'agreements' | 'negotiation' | 'activity') => {
+  const handleNavClick = (tab: 'landing' | 'home' | 'create' | 'agreements' | 'negotiation' | 'activity') => {
     onNavigate(tab);
     if (onCloseMobile) onCloseMobile();
   };
@@ -164,7 +164,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           <button
             onClick={() => handleNavClick('home')}
             className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-lg transition-all text-left ${
-              currentTab === 'home' || currentTab === 'create'
+              currentTab === 'home'
                 ? 'bg-[#1E1E28] text-[#00FF66] font-semibold border border-[#00FF66]/20'
                 : 'text-[#848494] hover:text-[#F3F3F6] hover:bg-[#121217]'
             }`}
@@ -172,6 +172,19 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           >
             <Terminal className="w-4 h-4 shrink-0 text-[#00FF66]" />
             {!collapsed && <span>Command Terminal</span>}
+          </button>
+
+          <button
+            onClick={() => handleNavClick('create')}
+            className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-lg transition-all text-left ${
+              currentTab === 'create'
+                ? 'bg-[#1E1E28] text-[#00FF66] font-semibold border border-[#00FF66]/20'
+                : 'text-[#848494] hover:text-[#F3F3F6] hover:bg-[#121217]'
+            }`}
+            title="AI Escrow Builder"
+          >
+            <Sparkles className="w-4 h-4 shrink-0 text-[#00FF66]" />
+            {!collapsed && <span>AI Escrow Builder</span>}
           </button>
 
           <button
