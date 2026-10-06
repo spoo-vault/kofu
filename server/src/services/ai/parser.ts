@@ -44,7 +44,8 @@ Return strictly valid JSON conforming to this schema:
   "confidence": number between 0.8 and 0.99
 }`;
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -73,10 +74,14 @@ Return strictly valid JSON conforming to this schema:
 
     const parsed = JSON.parse(rawContent);
 
+    const parsedAmount = typeof parsed.amount === 'number' 
+      ? parsed.amount 
+      : (parseFloat(parsed.amount) || 50);
+
     return {
       counterparty: parsed.counterparty || 'Counterparty',
       counterpartyType: parsed.counterpartyType === 'agent' ? 'agent' : 'human',
-      amount: typeof parsed.amount === 'number' ? parsed.amount : 50,
+      amount: parsedAmount,
       currency: ['USDC', 'XLM', 'EURC', 'USD'].includes(parsed.currency) ? parsed.currency : 'USDC',
       condition: parsed.condition || 'Deliverable completed and verified',
       deadline: parsed.deadline || 'Tomorrow',
