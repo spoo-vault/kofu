@@ -50,6 +50,11 @@ export interface Agreement {
   sorobanContractId?: string; // Soroban contract address (C...)
   escrowFunded: boolean;
   conditionSatisfied: boolean;
+  deliverableUrl?: string; // GitHub PR URL, deliverable link, or IPFS CID
+  deliverableNotes?: string; // Worker submission comments
+  counterpartyWallet?: string; // Connected worker's Stellar address
+  disputeReason?: string;
+  disputedAt?: string;
   stellarTxHash?: string; // Stellar 64-char transaction hash
   stellarLedger?: number;
   negotiationHistory?: NegotiationMessage[];

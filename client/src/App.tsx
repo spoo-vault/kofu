@@ -27,8 +27,22 @@ const DEFAULT_PARSED: ParsedAgreementInput = {
   autonomyLevel: 'ASSISTED',
 };
 
+const getInitialAgreementIdFromUrl = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get('agreement') || params.get('id');
+  if (fromQuery) return fromQuery;
+
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  if (pathParts[0] === 'agreement' && pathParts[1]) return pathParts[1];
+  if (pathParts[0] === 'app' && pathParts[1] === 'agreements' && pathParts[2]) return pathParts[2];
+  return null;
+};
+
 const getInitialTabFromUrl = (): TabType => {
   if (typeof window === 'undefined') return 'landing';
+  const agrId = getInitialAgreementIdFromUrl();
+  if (agrId) return 'detail';
   const path = window.location.pathname.toLowerCase();
   if (path === '/app/agreements' || path === '/app/activity') return 'activity';
   if (path === '/app/negotiation') return 'negotiation';
@@ -37,23 +51,26 @@ const getInitialTabFromUrl = (): TabType => {
 };
 
 export function App() {
+  const initialAgrId = getInitialAgreementIdFromUrl();
+  const [selectedAgreementId, setSelectedAgreementId] = useState<string | null>(initialAgrId);
   const [currentTab, setCurrentTab] = useState<TabType>(getInitialTabFromUrl);
   const [parsedData, setParsedData] = useState<ParsedAgreementInput | null>(null);
-  const [selectedAgreementId, setSelectedAgreementId] = useState<string | null>(null);
   const [sentinelStatus, setSentinelStatus] = useState<SentinelStatus | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false);
 
   // Sync browser URL whenever currentTab changes
-  const updateTabAndUrl = (tab: TabType) => {
+  const updateTabAndUrl = (tab: TabType, agrId?: string) => {
     setCurrentTab(tab);
     let targetPath = '/';
+    const activeId = agrId || selectedAgreementId;
     if (tab === 'home' || tab === 'create') targetPath = '/app';
+    else if (tab === 'detail' && activeId) targetPath = `/app?agreement=${activeId}`;
     else if (tab === 'activity' || tab === 'detail') targetPath = '/app/agreements';
     else if (tab === 'negotiation') targetPath = '/app/negotiation';
     else targetPath = '/';
 
-    if (window.location.pathname !== targetPath) {
+    if (window.location.pathname + window.location.search !== targetPath) {
       window.history.pushState(null, '', targetPath);
     }
   };
@@ -101,13 +118,13 @@ export function App() {
 
   const handleAgreementCreated = (agreement: Agreement) => {
     setSelectedAgreementId(agreement.id);
-    updateTabAndUrl('detail');
+    updateTabAndUrl('detail', agreement.id);
     fetchStatus();
   };
 
   const handleSelectAgreement = (id: string) => {
     setSelectedAgreementId(id);
-    updateTabAndUrl('detail');
+    updateTabAndUrl('detail', id);
   };
 
   const handleNavigate = (tab: 'landing' | 'home' | 'create' | 'agreements' | 'negotiation' | 'activity') => {
