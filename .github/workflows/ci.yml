@@ -1,0 +1,42 @@
+name: KOFU Protocol CI & Build Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    name: Build & Test Full Stack
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Root Dependencies
+        run: npm ci || npm install
+
+      - name: Install & Test Server
+        run: |
+          cd server
+          npm ci || npm install
+          npm run build
+          npm test
+
+      - name: Install & Build Client
+        run: |
+          cd client
+          npm ci || npm install
+          npm run build
+
+      - name: Validate Container Build
+        run: |
+          docker build -t kofu-backend:latest .

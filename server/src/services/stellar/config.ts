@@ -26,7 +26,7 @@ export const stellarConfig: StellarConfig = {
     : (process.env.STELLAR_SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org'),
   networkPassphrase: isMainnet ? Networks.PUBLIC : Networks.TESTNET,
   contractId: process.env.STELLAR_CONTRACT_ID || 'CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS',
-  adminPublicKey: process.env.STELLAR_ADMIN_PUBLIC_KEY || 'GCTCRCWCZ63GL6E3B3SWXHGIHQ2JGSMHZTUXIFB34Z7OWJHW6GDLNSQB',
+  adminPublicKey: process.env.STELLAR_ADMIN_PUBLIC_KEY || 'GBFOWEYQWBD6QSKBXMAXY2JFRDD7XAEZXHWFWXHQYK374M3YEWJYIQWQ',
   adminSecretKey: process.env.STELLAR_ADMIN_SECRET_KEY,
   usdcAssetCode: 'USDC',
   // Official Circle USDC on Stellar Testnet and Mainnet
@@ -34,7 +34,7 @@ export const stellarConfig: StellarConfig = {
     ? (process.env.STELLAR_USDC_ISSUER || 'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN')
     : (process.env.STELLAR_USDC_ISSUER || 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5'),
   friendbotUrl: 'https://friendbot.stellar.org',
-  isDemoMode: process.env.DEMO_MODE !== 'false',
+  isDemoMode: process.env.DEMO_MODE === 'true',
 };
 
 export function getExplorerTxUrl(txHash: string): string {
