@@ -9,6 +9,7 @@ import { WalletModal } from '../components/WalletModal';
 import {
   ArrowLeft,
   Shield,
+  ShieldCheck,
   Clock,
   CheckCircle2,
   AlertCircle,
@@ -413,6 +414,10 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
   }
 
   const currentStepIndex = LIFECYCLE_STEPS.indexOf(agreement.status);
+  const normalizedWallet = walletAddress?.trim().toLowerCase();
+  const initiatorWallet = agreement.initiator?.trim().toLowerCase();
+  const isFunder = Boolean(normalizedWallet && initiatorWallet && normalizedWallet === initiatorWallet);
+  const effectivePerspective = isFunder ? activePerspective : 'counterparty';
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8 font-mono">
@@ -453,48 +458,38 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
         </div>
       </div>
 
-      {/* 3-PARTY PERSPECTIVE SWITCHER */}
-      <div className="border border-[#1E1E28] bg-[#0A0A0E] p-2 rounded-xl flex items-center justify-between flex-wrap gap-2">
-        <span className="text-[10px] uppercase tracking-wider text-[#686878] px-2 flex items-center space-x-1">
-          <span>Active Interface View:</span>
-        </span>
+      {/* ROLE BANNER & ACCESS PERSPECTIVE */}
+      <div className="border border-[#1E1E28] bg-[#0A0A0E] px-4 py-3 rounded-xl flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center space-x-2.5">
+          <span className="text-[10px] uppercase tracking-wider text-[#686878]">Your Verified Role:</span>
+          {isFunder ? (
+            <span className="px-2.5 py-1 rounded bg-[#00FF66]/10 border border-[#00FF66]/30 text-[#00FF66] text-xs font-bold flex items-center space-x-1.5">
+              <User className="w-3.5 h-3.5" />
+              <span>Party 1: Funder (Creator &amp; Buyer)</span>
+            </span>
+          ) : (
+            <span className="px-2.5 py-1 rounded bg-[#00FF66]/10 border border-[#00FF66]/30 text-[#00FF66] text-xs font-bold flex items-center space-x-1.5">
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>Party 2: Worker (Recipient / Payee)</span>
+            </span>
+          )}
+        </div>
 
-        <div className="flex items-center space-x-1.5 bg-[#121217] p-1 rounded-lg border border-[#1E1E28]">
-          <button
-            onClick={() => setActivePerspective('funder')}
-            className={`px-3 py-1.5 rounded text-xs transition-all flex items-center space-x-1.5 cursor-pointer ${
-              activePerspective === 'funder'
-                ? 'bg-[#00FF66] text-[#08080A] font-bold shadow-sm'
-                : 'text-[#848494] hover:text-[#EDEDED]'
-            }`}
-          >
-            <User className="w-3 h-3" />
-            <span>Party 1: Funder (Buyer)</span>
-          </button>
+        <div className="flex items-center space-x-2 text-xs">
+          <span className="text-[11px] text-[#848494] flex items-center space-x-1.5 bg-[#121217] px-2.5 py-1 rounded-lg border border-[#1E1E28]">
+            <Radio className="w-3 h-3 text-[#00FF66] animate-pulse" />
+            <span className="text-[#848494]">Party 3:</span>
+            <span className="text-[#EDEDED] font-semibold">Gemini 2.0 AI Sentinel</span>
+          </span>
 
-          <button
-            onClick={() => setActivePerspective('counterparty')}
-            className={`px-3 py-1.5 rounded text-xs transition-all flex items-center space-x-1.5 cursor-pointer ${
-              activePerspective === 'counterparty'
-                ? 'bg-[#00FF66] text-[#08080A] font-bold shadow-sm'
-                : 'text-[#848494] hover:text-[#EDEDED]'
-            }`}
-          >
-            <Briefcase className="w-3 h-3" />
-            <span>Party 2: Worker (Recipient)</span>
-          </button>
-
-          <button
-            onClick={() => setActivePerspective('sentinel')}
-            className={`px-3 py-1.5 rounded text-xs transition-all flex items-center space-x-1.5 cursor-pointer ${
-              activePerspective === 'sentinel'
-                ? 'bg-[#00FF66] text-[#08080A] font-bold shadow-sm'
-                : 'text-[#848494] hover:text-[#EDEDED]'
-            }`}
-          >
-            <Radio className="w-3 h-3" />
-            <span>Party 3: Sentinel (Arbiter)</span>
-          </button>
+          {isFunder && (
+            <button
+              onClick={() => setActivePerspective(activePerspective === 'funder' ? 'counterparty' : 'funder')}
+              className="text-[11px] text-[#848494] hover:text-[#00FF66] underline transition-colors cursor-pointer ml-2"
+            >
+              {activePerspective === 'funder' ? 'Preview Worker View' : 'Back to Funder Console'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -594,162 +589,8 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
         </div>
       </div>
 
-      {/* DYNAMIC ROLE WORKSPACE (PARTY 1 VS PARTY 2 VS PARTY 3) */}
-      {activePerspective === 'counterparty' ? (
-        /* ================= PARTY 2: WORKER / COUNTERPARTY VIEW ================= */
-        <div className="border border-[#00FF66]/30 bg-[#0D0D11] rounded-xl p-6 space-y-5 shadow-[0_0_20px_rgba(0,255,102,0.06)]">
-          <div className="flex items-center justify-between pb-3 border-b border-[#1E1E28]">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#00FF66]/10 border border-[#00FF66]/30 flex items-center justify-center text-[#00FF66]">
-                <Briefcase className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-sm font-bold text-[#F3F3F6] uppercase tracking-wider block">
-                  Worker Deliverable Hub
-                </span>
-                <span className="text-[11px] text-[#848494]">
-                  You are the recipient. Submit completion proof to unlock your ${agreement.amount} {agreement.currency} payout.
-                </span>
-              </div>
-            </div>
-            <span className="text-[10px] px-2.5 py-1 rounded bg-[#121217] border border-[#1E1E28] text-[#00FF66]">
-              ROLE: PAYEE
-            </span>
-          </div>
-
-          {/* Deliverable Submission Form */}
-          {agreement.status === 'SETTLED' ? (
-            <div className="p-4 rounded-lg bg-[#00FF66]/10 border border-[#00FF66]/30 flex items-center space-x-3 text-xs text-[#00FF66]">
-              <CheckCircle2 className="w-5 h-5 shrink-0" />
-              <div>
-                <span className="font-bold block">Funds Have Been Paid Out!</span>
-                <span className="text-[#EDEDED]">
-                  ${agreement.amount.toFixed(2)} {agreement.currency} was released to your Stellar wallet address.
-                </span>
-              </div>
-            </div>
-          ) : agreement.status === 'DISPUTED' ? (
-            <div className="p-4 rounded-lg bg-[#FF4D4D]/10 border border-[#FF4D4D]/30 space-y-2 text-xs text-[#FF4D4D]">
-              <div className="flex items-center space-x-2 font-bold">
-                <AlertTriangle className="w-4 h-4" />
-                <span>Escrow Frozen in Dispute</span>
-              </div>
-              <p className="text-[#EDEDED]">
-                Reason: {agreement.disputeReason || 'Terms contested by a party.'} Autonomous Sentinel arbiter is evaluating the case.
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmitDeliverable} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#EDEDED] uppercase tracking-wider block">
-                  Deliverable Proof Link (GitHub PR / Preview / IPFS)
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={deliverableUrl}
-                  onChange={(e) => setDeliverableUrl(e.target.value)}
-                  placeholder="e.g. https://github.com/org/repo/pull/42 or https://mydemo.app"
-                  className="w-full bg-[#08080A] border border-[#1E1E28] focus:border-[#00FF66] px-3.5 py-2.5 rounded-lg text-xs text-[#F3F3F6] outline-none font-mono"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#848494] uppercase tracking-wider block">
-                  Completion Notes (Optional)
-                </label>
-                <textarea
-                  rows={2}
-                  value={deliverableNotes}
-                  onChange={(e) => setDeliverableNotes(e.target.value)}
-                  placeholder="Describe completed work, test passes, or deliverables..."
-                  className="w-full bg-[#08080A] border border-[#1E1E28] focus:border-[#00FF66] p-3 rounded-lg text-xs text-[#F3F3F6] outline-none font-mono"
-                />
-              </div>
-
-              {deliverableSuccess && (
-                <div className="p-2.5 rounded bg-[#00FF66]/10 border border-[#00FF66]/30 text-xs text-[#00FF66] flex items-center space-x-1.5">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Deliverable proof submitted! Buyer and Sentinel have been notified.</span>
-                </div>
-              )}
-
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={isSubmittingDeliverable || !deliverableUrl.trim()}
-                  className="px-5 py-2.5 bg-[#00FF66] hover:bg-[#00D154] disabled:bg-[#1E1E28] disabled:text-[#505060] text-[#08080A] font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center space-x-2 cursor-pointer shadow-[0_0_15px_rgba(0,255,102,0.2)] disabled:cursor-not-allowed"
-                >
-                  {isSubmittingDeliverable ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Send className="w-3.5 h-3.5" />
-                  )}
-                  <span>Submit Deliverable Proof</span>
-                </button>
-
-                {agreement.status === 'CONDITION_MET' && (
-                  <button
-                    type="button"
-                    onClick={handleReleasePayment}
-                    disabled={actionLoading}
-                    className="px-5 py-2.5 bg-[#121217] hover:bg-[#1E1E28] border border-[#00FF66]/50 text-[#00FF66] font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center space-x-2 cursor-pointer"
-                  >
-                    {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                    <span>Claim ${agreement.amount.toFixed(2)} {agreement.currency} Payout</span>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setDisputeModalOpen(true)}
-                  className="px-4 py-2.5 bg-[#121217] hover:bg-[#FF4D4D]/20 border border-[#FF4D4D]/30 text-[#FF4D4D] text-xs font-semibold rounded-lg transition-all flex items-center space-x-1.5 cursor-pointer ml-auto"
-                >
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  <span>Raise Dispute</span>
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      ) : activePerspective === 'sentinel' ? (
-        /* ================= PARTY 3: SENTINEL MONITOR VIEW ================= */
-        <div className="border border-[#1E1E28] bg-[#0D0D11] rounded-xl p-6 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#1E1E28]">
-            <div className="flex items-center space-x-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#00FF66] shadow-[0_0_8px_#00FF66] animate-pulse"></span>
-              <div>
-                <span className="text-sm font-bold text-[#F3F3F6] uppercase tracking-wider block">
-                  Sentinel Oracle &amp; Arbitration Protocol
-                </span>
-                <span className="text-[11px] text-[#848494]">
-                  Autonomous neutral observer monitoring cryptographic condition milestones.
-                </span>
-              </div>
-            </div>
-            <span className="text-[10px] bg-[#121217] border border-[#1E1E28] px-2.5 py-1 rounded text-[#848494]">
-              HEARTBEAT: ACTIVE
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
-            <div className="p-3 rounded-lg bg-[#08080A] border border-[#1E1E28]">
-              <span className="text-[#686878] text-[10px] uppercase block mb-1">Dual-Trigger Mechanism</span>
-              <span className="text-[#00FF66] font-semibold">Client Release + Oracle Release</span>
-            </div>
-            <div className="p-3 rounded-lg bg-[#08080A] border border-[#1E1E28]">
-              <span className="text-[#686878] text-[10px] uppercase block mb-1">Smart Contract Lock</span>
-              <span className="text-[#EDEDED] font-mono text-[11px] truncate block">
-                {SorobanEscrowClient ? 'CAXNYG...SVJS' : 'On-Chain'}
-              </span>
-            </div>
-            <div className="p-3 rounded-lg bg-[#08080A] border border-[#1E1E28]">
-              <span className="text-[#686878] text-[10px] uppercase block mb-1">Dispute Sovereignty</span>
-              <span className="text-[#00FF66] font-semibold">Immediate On-Chain Freeze</span>
-            </div>
-          </div>
-        </div>
-      ) : (
+      {/* DYNAMIC ROLE WORKSPACE: PARTY 1 VS PARTY 2 */}
+      {effectivePerspective === 'funder' ? (
         /* ================= PARTY 1: FUNDER / BUYER VIEW ================= */
         <div className="border border-[#1E1E28] bg-[#0D0D11] rounded-xl p-6 space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-[#1E1E28]">
@@ -885,7 +726,178 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
             </div>
           )}
         </div>
+      ) : (
+        /* ================= PARTY 2: WORKER / COUNTERPARTY VIEW ================= */
+        <div className="border border-[#00FF66]/30 bg-[#0D0D11] rounded-xl p-6 space-y-5 shadow-[0_0_20px_rgba(0,255,102,0.06)]">
+          <div className="flex items-center justify-between pb-3 border-b border-[#1E1E28]">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[#00FF66]/10 border border-[#00FF66]/30 flex items-center justify-center text-[#00FF66]">
+                <Briefcase className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-sm font-bold text-[#F3F3F6] uppercase tracking-wider block">
+                  Worker Deliverable Hub
+                </span>
+                <span className="text-[11px] text-[#848494]">
+                  You are the recipient. Submit completion proof to unlock your ${agreement.amount} {agreement.currency} payout.
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] px-2.5 py-1 rounded bg-[#121217] border border-[#1E1E28] text-[#00FF66]">
+              ROLE: PAYEE
+            </span>
+          </div>
+
+          {/* Prompt if worker is not connected */}
+          {!walletAddress && (
+            <div className="p-3.5 rounded-lg bg-[#00FF66]/5 border border-[#00FF66]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center space-x-2 text-[#EDEDED]">
+                <ShieldCheck className="w-4 h-4 text-[#00FF66] shrink-0" />
+                <span>Connect your Stellar wallet to accept this assignment and submit completion deliverables.</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWalletModalOpen(true)}
+                className="px-3.5 py-1.5 rounded-lg bg-[#00FF66] hover:bg-[#00D154] text-[#08080A] font-bold text-xs uppercase tracking-wider font-mono shrink-0 transition-all cursor-pointer"
+              >
+                Connect Wallet
+              </button>
+            </div>
+          )}
+
+          {/* Deliverable Submission Form */}
+          {agreement.status === 'SETTLED' ? (
+            <div className="p-4 rounded-lg bg-[#00FF66]/10 border border-[#00FF66]/30 flex items-center space-x-3 text-xs text-[#00FF66]">
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
+              <div>
+                <span className="font-bold block">Funds Have Been Paid Out!</span>
+                <span className="text-[#EDEDED]">
+                  ${agreement.amount.toFixed(2)} {agreement.currency} was released to your Stellar wallet address.
+                </span>
+              </div>
+            </div>
+          ) : agreement.status === 'DISPUTED' ? (
+            <div className="p-4 rounded-lg bg-[#FF4D4D]/10 border border-[#FF4D4D]/30 space-y-2 text-xs text-[#FF4D4D]">
+              <div className="flex items-center space-x-2 font-bold">
+                <AlertTriangle className="w-4 h-4" />
+                <span>Escrow Frozen in Dispute</span>
+              </div>
+              <p className="text-[#EDEDED]">
+                Reason: {agreement.disputeReason || 'Terms contested by a party.'} Autonomous Sentinel arbiter is evaluating the case.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmitDeliverable} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#EDEDED] uppercase tracking-wider block">
+                  Deliverable Proof Link (GitHub PR / Preview / IPFS)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={deliverableUrl}
+                  onChange={(e) => setDeliverableUrl(e.target.value)}
+                  placeholder="e.g. https://github.com/org/repo/pull/42 or https://mydemo.app"
+                  className="w-full bg-[#08080A] border border-[#1E1E28] focus:border-[#00FF66] px-3.5 py-2.5 rounded-lg text-xs text-[#F3F3F6] outline-none font-mono"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#848494] uppercase tracking-wider block">
+                  Completion Notes (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={deliverableNotes}
+                  onChange={(e) => setDeliverableNotes(e.target.value)}
+                  placeholder="Describe completed work, test passes, or deliverables..."
+                  className="w-full bg-[#08080A] border border-[#1E1E28] focus:border-[#00FF66] p-3 rounded-lg text-xs text-[#F3F3F6] outline-none font-mono"
+                />
+              </div>
+
+              {deliverableSuccess && (
+                <div className="p-2.5 rounded bg-[#00FF66]/10 border border-[#00FF66]/30 text-xs text-[#00FF66] flex items-center space-x-1.5">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Deliverable proof submitted! Buyer and Sentinel have been notified.</span>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={isSubmittingDeliverable || !deliverableUrl.trim()}
+                  className="px-5 py-2.5 bg-[#00FF66] hover:bg-[#00D154] disabled:bg-[#1E1E28] disabled:text-[#505060] text-[#08080A] font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center space-x-2 cursor-pointer shadow-[0_0_15px_rgba(0,255,102,0.2)] disabled:cursor-not-allowed"
+                >
+                  {isSubmittingDeliverable ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Send className="w-3.5 h-3.5" />
+                  )}
+                  <span>Submit Deliverable Proof</span>
+                </button>
+
+                {agreement.status === 'CONDITION_MET' && (
+                  <button
+                    type="button"
+                    onClick={handleReleasePayment}
+                    disabled={actionLoading}
+                    className="px-5 py-2.5 bg-[#121217] hover:bg-[#1E1E28] border border-[#00FF66]/50 text-[#00FF66] font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center space-x-2 cursor-pointer"
+                  >
+                    {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    <span>Claim ${agreement.amount.toFixed(2)} {agreement.currency} Payout</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setDisputeModalOpen(true)}
+                  className="px-4 py-2.5 bg-[#121217] hover:bg-[#FF4D4D]/20 border border-[#FF4D4D]/30 text-[#FF4D4D] text-xs font-semibold rounded-lg transition-all flex items-center space-x-1.5 cursor-pointer ml-auto"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span>Raise Dispute</span>
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       )}
+
+      {/* ================= PARTY 3: AUTONOMOUS SENTINEL ORACLE (PERMANENTLY VISIBLE TO BOTH PARTIES) ================= */}
+      <div className="border border-[#1E1E28] bg-[#0D0D11] rounded-xl p-6 space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#1E1E28]">
+          <div className="flex items-center space-x-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#00FF66] shadow-[0_0_8px_#00FF66] animate-pulse"></span>
+            <div>
+              <span className="text-sm font-bold text-[#F3F3F6] uppercase tracking-wider block">
+                Party 3: Autonomous Sentinel Oracle &amp; Arbitration Protocol
+              </span>
+              <span className="text-[11px] text-[#848494]">
+                Impartial AI observer monitoring milestone conditions &amp; dual-trigger Soroban smart contract releases.
+              </span>
+            </div>
+          </div>
+          <span className="text-[10px] bg-[#121217] border border-[#1E1E28] px-2.5 py-1 rounded text-[#00FF66] font-semibold">
+            STATUS: ACTIVE &amp; MONITORING
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+          <div className="p-3 rounded-lg bg-[#08080A] border border-[#1E1E28]">
+            <span className="text-[#686878] text-[10px] uppercase block mb-1">Dual-Trigger Mechanism</span>
+            <span className="text-[#00FF66] font-semibold">Client Release + Oracle Release</span>
+          </div>
+          <div className="p-3 rounded-lg bg-[#08080A] border border-[#1E1E28]">
+            <span className="text-[#686878] text-[10px] uppercase block mb-1">Smart Contract Lock</span>
+            <span className="text-[#EDEDED] font-mono text-[11px] truncate block">
+              {SorobanEscrowClient ? 'CAXNYG...SVJS' : 'On-Chain'}
+            </span>
+          </div>
+          <div className="p-3 rounded-lg bg-[#08080A] border border-[#1E1E28]">
+            <span className="text-[#686878] text-[10px] uppercase block mb-1">Dispute Sovereignty</span>
+            <span className="text-[#00FF66] font-semibold">Immediate On-Chain Freeze</span>
+          </div>
+        </div>
+      </div>
 
       {/* Lifecycle Stepper */}
       <div className="border border-[#1E1E28] bg-[#0D0D11] rounded-xl p-5 space-y-3">

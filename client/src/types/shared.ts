@@ -52,6 +52,9 @@ export interface Agreement {
   conditionSatisfied: boolean;
   stellarTxHash?: string; // Stellar 64-char transaction hash
   stellarLedger?: number;
+  deliverableUrl?: string;
+  deliverableNotes?: string;
+  disputeReason?: string;
   negotiationHistory?: NegotiationMessage[];
   createdAt: string;
   updatedAt: string;
