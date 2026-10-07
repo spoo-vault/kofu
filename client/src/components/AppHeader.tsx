@@ -86,6 +86,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <span className="text-[#00FF66] font-bold">{activeCount} ACTIVE</span>
           </div>
 
+          <div className="hidden xl:flex items-center space-x-2 px-2.5 py-1 rounded bg-[#0D0D11] border border-[#1E1E28] text-[11px] text-[#848494]">
+            <span>ESCROW:</span>
+            <span className="text-[#00FF66] font-bold">{sentinelStatus?.totalInEscrow ?? 0} USDC</span>
+          </div>
+
           <a
             href="https://stellar.expert/explorer/testnet/contract/CAXNYG4P32DU3EVJLAN6HZ3PR67OZGABG4VRFIYITJQZDHR76X6RSVJS"
             target="_blank"

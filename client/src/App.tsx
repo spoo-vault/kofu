@@ -3,7 +3,6 @@ import { ParsedAgreementInput, Agreement, SentinelStatus } from '@kofu/shared';
 import { Navbar } from './components/Navbar';
 import { AppSidebar } from './components/AppSidebar';
 import { AppHeader } from './components/AppHeader';
-import { StatusBar } from './components/StatusBar';
 import { MarketingPage } from './pages/MarketingPage';
 import { HomePage } from './pages/HomePage';
 import { CreateAgreementPage } from './pages/CreateAgreementPage';
@@ -222,9 +221,6 @@ export function App() {
             />
           )}
         </main>
-
-        {/* Persistent Workspace Status Bar */}
-        <StatusBar status={sentinelStatus} />
       </div>
     </div>
   );
