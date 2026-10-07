@@ -149,7 +149,12 @@ export class SorobanEscrowClient {
           console.warn('[SorobanClient] Token simulation failed (missing token trustline), falling back to native XLM SAC...');
           tokenContract = NATIVE_XLM_SAC;
           tx = buildTx(tokenContract);
-          prepared = await this.rpcServer.prepareTransaction(tx);
+          try {
+            prepared = await this.rpcServer.prepareTransaction(tx);
+          } catch (xlmErr: any) {
+            console.error('[SorobanClient] XLM SAC simulation failed:', xlmErr);
+            throw new Error(`Simulation failed: Account has insufficient balance on Stellar Testnet for ${agreement.amount} ${agreement.currency} deposit. Please request Friendbot XLM.`);
+          }
         } else {
           throw simErr;
         }
@@ -165,7 +170,8 @@ export class SorobanEscrowClient {
       const sendRes = await this.rpcServer.sendTransaction(signedTx);
 
       if (sendRes.status === 'ERROR') {
-        throw new Error(`Stellar RPC rejected transaction: ${JSON.stringify(sendRes.errorResult)}`);
+        const detail = sendRes.errorResult ? JSON.stringify(sendRes.errorResult) : 'Transaction declined by network node';
+        throw new Error(`Stellar Testnet RPC node returned error: ${detail}`);
       }
 
       console.log(`[SorobanClient] Transaction submitted! Hash: ${sendRes.hash}. Waiting for ledger inclusion...`);
@@ -226,7 +232,8 @@ export class SorobanEscrowClient {
     const sendRes = await this.rpcServer.sendTransaction(signedTx);
 
     if (sendRes.status === 'ERROR') {
-      throw new Error(`Stellar RPC rejected settlement: ${JSON.stringify(sendRes.errorResult)}`);
+      const detail = sendRes.errorResult ? JSON.stringify(sendRes.errorResult) : 'Settlement declined by network node';
+      throw new Error(`Stellar Testnet RPC settlement error: ${detail}`);
     }
 
     console.log(`[SorobanClient] Settlement broadcast! Hash: ${sendRes.hash}. Waiting for ledger inclusion...`);
@@ -278,7 +285,8 @@ export class SorobanEscrowClient {
     const sendRes = await this.rpcServer.sendTransaction(signedTx);
 
     if (sendRes.status === 'ERROR') {
-      throw new Error(`Stellar RPC rejected dispute: ${JSON.stringify(sendRes.errorResult)}`);
+      const detail = sendRes.errorResult ? JSON.stringify(sendRes.errorResult) : 'Dispute declined by network node';
+      throw new Error(`Stellar Testnet RPC dispute error: ${detail}`);
     }
 
     const pollRes = await this.rpcServer.pollTransaction(sendRes.hash);
@@ -329,7 +337,8 @@ export class SorobanEscrowClient {
     const sendRes = await this.rpcServer.sendTransaction(signedTx);
 
     if (sendRes.status === 'ERROR') {
-      throw new Error(`Stellar RPC rejected refund: ${JSON.stringify(sendRes.errorResult)}`);
+      const detail = sendRes.errorResult ? JSON.stringify(sendRes.errorResult) : 'Refund declined by network node';
+      throw new Error(`Stellar Testnet RPC refund error: ${detail}`);
     }
 
     console.log(`[SorobanClient] Refund broadcast! Hash: ${sendRes.hash}. Waiting for ledger inclusion...`);

@@ -186,12 +186,19 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
     } catch (err: any) {
       console.error('Real on-chain escrow funding error:', err);
       const msg = err?.message || 'Failed to fund escrow on Stellar Testnet';
-      if (msg.includes('declined') || msg.includes('cancel') || msg.includes('reject')) {
+      const isExplicitCancellation =
+        msg.toLowerCase().includes('user declined') ||
+        msg.toLowerCase().includes('user cancelled') ||
+        msg.toLowerCase().includes('signature was cancelled');
+
+      if (isExplicitCancellation) {
         setError('Transaction signature was cancelled in your wallet.');
-      } else if (msg.includes('balance') || msg.includes('underfunded')) {
-        setError(`Insufficient balance on Stellar Testnet. Please request Friendbot XLM from the wallet menu.`);
+      } else if (msg.toLowerCase().includes('balance') || msg.toLowerCase().includes('underfunded') || msg.toLowerCase().includes('sufficient')) {
+        setError(`Insufficient Testnet Balance: ${msg}`);
+      } else if (msg.includes('mismatch') || msg.includes('Testnet') || msg.includes('Public Network')) {
+        setError(msg);
       } else {
-        setError(`Stellar Testnet Notice: ${msg}`);
+        setError(msg.startsWith('Stellar') ? msg : `Stellar Testnet Notice: ${msg}`);
       }
     } finally {
       setActionLoading(false);
@@ -286,10 +293,15 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
     } catch (err: any) {
       console.error('Real on-chain settlement release error:', err);
       const msg = err?.message || 'Failed to release payment on Stellar Testnet';
-      if (msg.includes('declined') || msg.includes('cancel') || msg.includes('reject')) {
+      const isExplicitCancellation =
+        msg.toLowerCase().includes('user declined') ||
+        msg.toLowerCase().includes('user cancelled') ||
+        msg.toLowerCase().includes('signature was cancelled');
+
+      if (isExplicitCancellation) {
         setError('Transaction signature was cancelled in your wallet.');
       } else {
-        setError(`Stellar Testnet Settlement Notice: ${msg}`);
+        setError(msg.startsWith('Stellar') ? msg : `Stellar Testnet Settlement Notice: ${msg}`);
       }
     } finally {
       setActionLoading(false);
@@ -337,12 +349,17 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
     } catch (err: any) {
       console.error('Real on-chain escrow refund error:', err);
       const msg = err?.message || 'Failed to refund escrow on Stellar Testnet';
+      const isExplicitCancellation =
+        msg.toLowerCase().includes('user declined') ||
+        msg.toLowerCase().includes('user cancelled') ||
+        msg.toLowerCase().includes('signature was cancelled');
+
       if (msg.includes('TimeoutNotReached') || msg.includes('8')) {
         setError('Soroban Notice: Escrow timeout ledger has not yet elapsed.');
-      } else if (msg.includes('declined') || msg.includes('cancel') || msg.includes('reject')) {
+      } else if (isExplicitCancellation) {
         setError('Transaction signature was cancelled in your wallet.');
       } else {
-        setError(`Stellar Testnet Refund Notice: ${msg}`);
+        setError(msg.startsWith('Stellar') ? msg : `Stellar Testnet Refund Notice: ${msg}`);
       }
     } finally {
       setActionLoading(false);
@@ -721,8 +738,65 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
           )}
 
           {error && (
-            <div className="p-2.5 rounded bg-[#FF4D4D]/10 border border-[#FF4D4D]/30 text-[#FF4D4D] text-xs">
-              {error}
+            <div className="p-3.5 rounded-lg bg-[#FF4D4D]/10 border border-[#FF4D4D]/30 text-xs space-y-2.5">
+              <div className="flex items-start space-x-2 text-[#FF4D4D]">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span className="font-mono leading-relaxed">{error}</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#FF4D4D]/20">
+                {walletAddress && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setActionLoading(true);
+                      setError('Requesting 10,000 XLM airdrop from Stellar Friendbot...');
+                      try {
+                        const res = await fetch(`https://friendbot.stellar.org?addr=${encodeURIComponent(walletAddress)}`);
+                        if (res.ok) {
+                          setError(null);
+                        } else {
+                          const txt = await res.text();
+                          setError(`Friendbot notice: ${txt}`);
+                        }
+                      } catch (e: any) {
+                        setError(`Friendbot error: ${e?.message}`);
+                      } finally {
+                        setActionLoading(false);
+                      }
+                    }}
+                    className="px-2.5 py-1 rounded bg-[#FF4D4D]/20 hover:bg-[#FF4D4D]/30 text-[#EDEDED] font-mono text-[11px] cursor-pointer transition-colors"
+                  >
+                    ⚡ Request Friendbot XLM
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setWalletModalOpen(true)}
+                  className="px-2.5 py-1 rounded bg-[#121217] hover:bg-[#1E1E28] border border-[#1E1E28] text-[#EDEDED] font-mono text-[11px] cursor-pointer transition-colors"
+                >
+                  ⚙️ Wallet Settings / Switch Network
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setActionLoading(true);
+                    setError(null);
+                    try {
+                      const res = await api.fundEscrow(agreement.id);
+                      setAgreement(res.agreement);
+                      setEvents(res.events);
+                    } catch (simErr: any) {
+                      setError(simErr?.message);
+                    } finally {
+                      setActionLoading(false);
+                    }
+                  }}
+                  className="px-2.5 py-1 rounded bg-[#00FF66]/15 hover:bg-[#00FF66]/25 text-[#00FF66] border border-[#00FF66]/30 font-mono text-[11px] cursor-pointer ml-auto transition-colors"
+                  title="Simulate escrow lock directly using autonomous agent"
+                >
+                  🤖 Quick-Fund via Demo Agent
+                </button>
+              </div>
             </div>
           )}
         </div>

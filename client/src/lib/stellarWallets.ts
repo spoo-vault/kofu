@@ -9,6 +9,7 @@ import {
   signTransaction as signFreighterTransaction,
   isAllowed as isFreighterAllowed,
   isConnected as isFreighterConnected,
+  getNetworkDetails as getFreighterNetworkDetails,
   WatchWalletChanges,
 } from '@stellar/freighter-api';
 
@@ -259,18 +260,48 @@ class StellarWalletService {
           this.setConnected(access.address, 'freighter');
         }
 
+        // Verify Freighter network is Testnet
+        try {
+          const net = await getFreighterNetworkDetails();
+          if (net?.networkPassphrase && net.networkPassphrase !== Networks.TESTNET) {
+            throw new Error(
+              `Freighter network mismatch: Your wallet is currently set to ${net.network || 'Public Network'}, but Kofu smart contracts run on Stellar Testnet. Please open Freighter settings (gear icon) and switch to Testnet.`
+            );
+          }
+        } catch (netErr: any) {
+          if (netErr?.message?.includes('mismatch') || netErr?.message?.includes('Testnet')) {
+            throw netErr;
+          }
+        }
+
         const fRes = await signFreighterTransaction(xdr, {
           networkPassphrase: Networks.TESTNET,
+          address: this.currentAddress || undefined,
         });
+
         if (fRes?.signedTxXdr && !fRes.error) {
           return { signedTxXdr: fRes.signedTxXdr };
         }
+
         if (fRes?.error) {
-          throw new Error(typeof fRes.error === 'string' ? fRes.error : 'Freighter transaction signing rejected');
+          const rawErr = fRes.error;
+          const msg = typeof rawErr === 'string'
+            ? rawErr
+            : (rawErr as any)?.message || (rawErr as any)?.error || JSON.stringify(rawErr);
+          throw new Error(msg);
         }
       } catch (fErr: any) {
         console.warn('Freighter signTransaction notice, trying Kit fallback:', fErr);
-        throw fErr;
+        const fMsg = fErr?.message || '';
+        if (
+          fMsg.toLowerCase().includes('declined') ||
+          fMsg.toLowerCase().includes('cancel') ||
+          fMsg.includes('Testnet') ||
+          fMsg.includes('mismatch')
+        ) {
+          throw fErr;
+        }
+        // Fallback to StellarWalletsKit if direct extension bridge had an unexpected issue
       }
     }
 
@@ -280,7 +311,7 @@ class StellarWalletService {
       });
       return { signedTxXdr: res.signedTxXdr };
     } catch (err: any) {
-      throw new Error(err?.message || 'Transaction signing rejected or failed.');
+      throw new Error(err?.message || 'Transaction signing could not be completed by your wallet.');
     }
   }
 
