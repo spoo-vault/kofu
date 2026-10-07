@@ -96,28 +96,35 @@ export const api = {
 
   async getAgreements(walletAddress?: string): Promise<Agreement[]> {
     const activeWallet = walletAddress || stellarWalletService.getAddress();
+    // Requirement 1: Do NOT expose session history without a connected wallet
+    if (!activeWallet) {
+      return [];
+    }
+
+    const target = activeWallet.trim().toLowerCase();
+
     try {
       const res = await fetch(`${API_BASE}/agreements`);
       if (res.ok) {
         const list: Agreement[] = await res.json();
-        if (activeWallet) {
-          return list.filter(
-            (a) => a.initiator === activeWallet || (a.counterparty && a.counterparty.includes(activeWallet))
-          );
-        }
-        return list;
+        return list.filter((a) => {
+          const init = a.initiator?.trim().toLowerCase();
+          const cpWallet = a.counterpartyWallet?.trim().toLowerCase();
+          const cp = a.counterparty?.trim().toLowerCase();
+          return init === target || cpWallet === target || cp === target;
+        });
       }
     } catch {
       // Fallback
     }
 
     const list = getStoredAgreements();
-    if (activeWallet) {
-      return list.filter(
-        (a) => a.initiator === activeWallet || (a.counterparty && a.counterparty.includes(activeWallet))
-      );
-    }
-    return list;
+    return list.filter((a) => {
+      const init = a.initiator?.trim().toLowerCase();
+      const cpWallet = a.counterpartyWallet?.trim().toLowerCase();
+      const cp = a.counterparty?.trim().toLowerCase();
+      return init === target || cpWallet === target || cp === target;
+    });
   },
 
   async getAgreement(id: string): Promise<{ agreement: Agreement; events: AgreementEvent[] }> {
@@ -172,11 +179,14 @@ export const api = {
 
     const list = getStoredAgreements();
     const num = String(list.length + 1).padStart(3, '0');
-    const connectedWallet = stellarWalletService.getAddress();
+    const connectedWallet = data.initiator || stellarWalletService.getAddress();
+    if (!connectedWallet) {
+      throw new Error('Please connect your Stellar wallet before initializing an escrow.');
+    }
     const newAgr: Agreement = {
       id: `kofu-${Date.now()}`,
       humanReadableId: `KOFU-${num}`,
-      initiator: data.initiator || connectedWallet || 'GBFOWEYQWBD6QSKBXMAXY2JFRDD7XAEZXHWFWXHQYK374M3YEWJYIQWQ',
+      initiator: connectedWallet,
       counterparty: data.counterparty || 'David',
       counterpartyType: data.counterpartyType || 'human',
       amount: data.amount || 50,
@@ -368,23 +378,30 @@ export const api = {
 
   async getTransactions(walletAddress?: string): Promise<Transaction[]> {
     const activeWallet = walletAddress || stellarWalletService.getAddress();
+    // Requirement 1: Do NOT expose session transactions without a connected wallet
+    if (!activeWallet) {
+      return [];
+    }
+
+    const target = activeWallet.trim().toLowerCase();
+
     try {
       const res = await fetch(`${API_BASE}/transactions`);
       if (res.ok) {
         const txs: Transaction[] = await res.json();
-        if (activeWallet) {
-          return txs.filter((t) => t.from === activeWallet || t.to === activeWallet);
-        }
-        return txs;
+        return txs.filter((t) => t.from?.toLowerCase() === target || t.to?.toLowerCase() === target);
       }
     } catch {
       // Fallback
     }
 
     const list = getStoredAgreements().filter((a) => a.escrowFunded && a.stellarTxHash);
-    const filtered = activeWallet
-      ? list.filter((a) => a.initiator === activeWallet || (a.counterparty && a.counterparty.includes(activeWallet)))
-      : list;
+    const filtered = list.filter((a) => {
+      const init = a.initiator?.trim().toLowerCase();
+      const cpWallet = a.counterpartyWallet?.trim().toLowerCase();
+      const cp = a.counterparty?.trim().toLowerCase();
+      return init === target || cpWallet === target || cp === target;
+    });
 
     return filtered.map((a, i) => ({
       id: `tx-${a.id}`,

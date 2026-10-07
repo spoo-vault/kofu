@@ -85,6 +85,15 @@ export class FirestoreService {
     walletAddress?: string | null
   ): Unsubscribe | null {
     if (!this.isAvailable()) return null;
+
+    // Requirement 1: Do NOT expose session history without a connected wallet
+    if (!walletAddress) {
+      callback([]);
+      return () => {};
+    }
+
+    const target = walletAddress.trim().toLowerCase();
+
     try {
       const q = query(collection(firestoreDb, AGREEMENTS_COLLECTION));
       return onSnapshot(
@@ -97,11 +106,18 @@ export class FirestoreService {
             if (data.id === 'kofu-1789658758725' || data.id === 'kofu-1789659998124') {
               return;
             }
-            if (
-              !walletAddress ||
-              data.initiator === walletAddress ||
-              (data.counterparty && data.counterparty.includes(walletAddress))
-            ) {
+
+            // Requirement 3: Strict per-account session filtering
+            const init = data.initiator?.trim().toLowerCase();
+            const cpWallet = data.counterpartyWallet?.trim().toLowerCase();
+            const cp = data.counterparty?.trim().toLowerCase();
+
+            const isMyAccount =
+              init === target ||
+              cpWallet === target ||
+              cp === target;
+
+            if (isMyAccount) {
               list.push(data);
             }
           });

@@ -225,9 +225,20 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           </div>
 
           <div className="space-y-0.5">
-            {agreements.length === 0 ? (
+            {!walletAddress ? (
               <div className="py-6 px-2 text-center space-y-2">
-                <p className="text-[11px] text-[#505060]">No escrows created yet</p>
+                <p className="text-[11px] text-[#848494]">Wallet not connected</p>
+                <p className="text-[10px] text-[#505060]">Connect to view your sessions</p>
+                <button
+                  onClick={() => setWalletModalOpen(true)}
+                  className="mt-1 py-1 px-3 rounded bg-[#00FF66]/10 hover:bg-[#00FF66]/20 border border-[#00FF66]/30 text-[#00FF66] text-[10px] font-semibold transition-colors cursor-pointer"
+                >
+                  Connect Wallet
+                </button>
+              </div>
+            ) : agreements.length === 0 ? (
+              <div className="py-6 px-2 text-center space-y-2">
+                <p className="text-[11px] text-[#505060]">No escrows for this account</p>
                 <button
                   onClick={onNewAgreement}
                   className="text-[10px] text-[#00FF66] hover:underline font-semibold"

@@ -70,8 +70,9 @@ class StellarWalletService {
   private freighterWatcher: WatchWalletChanges | null = null;
 
   constructor() {
-    this.restoreSession();
-    this.setupWatcher();
+    // Explicit connection only: no auto connection on startup in background or underground
+    this.currentAddress = null;
+    this.currentWallet = null;
   }
 
   private setupWatcher() {
@@ -124,55 +125,6 @@ class StellarWalletService {
       this.initialized = true;
     } catch (err) {
       console.warn('StellarWalletsKit init notice:', err);
-    }
-  }
-
-  private restoreSession() {
-    try {
-      const savedAddress = localStorage.getItem('kofu_wallet_address');
-      const savedWallet = localStorage.getItem('kofu_wallet_id') as SupportedWalletId | null;
-      if (savedAddress) {
-        if (savedWallet === 'freighter') {
-          // Do not blindly trust cached freighter address if extension revoked permission
-          this.verifyFreighterSession(savedAddress);
-          return;
-        }
-        this.currentAddress = savedAddress;
-        this.currentWallet = savedWallet || 'freighter';
-      }
-    } catch {
-      // LocalStorage unavailable
-    }
-  }
-
-  public async verifyFreighterSession(expectedAddress?: string): Promise<boolean> {
-    try {
-      const allowedRes = await isFreighterAllowed();
-      if (!allowedRes?.isAllowed) {
-        // Site not allowed in Freighter - clear unverified cache
-        this.clearSession();
-        return false;
-      }
-      const addrRes = await getFreighterAddress();
-      if (addrRes?.address && !addrRes.error) {
-        this.setConnected(addrRes.address, 'freighter');
-        return true;
-      } else {
-        this.clearSession();
-        return false;
-      }
-    } catch {
-      this.clearSession();
-      return false;
-    }
-  }
-
-  private persistSession(address: string, walletId: SupportedWalletId) {
-    try {
-      localStorage.setItem('kofu_wallet_address', address);
-      localStorage.setItem('kofu_wallet_id', walletId);
-    } catch {
-      // ignore
     }
   }
 
@@ -346,7 +298,6 @@ class StellarWalletService {
   private setConnected(address: string, walletId: SupportedWalletId) {
     this.currentAddress = address;
     this.currentWallet = walletId;
-    this.persistSession(address, walletId);
     this.notify();
   }
 }

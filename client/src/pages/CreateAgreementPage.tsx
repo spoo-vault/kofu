@@ -14,8 +14,11 @@ import {
   Cpu,
   Layers,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  Wallet
 } from 'lucide-react';
+import { stellarWalletService } from '../lib/stellarWallets';
+import { WalletModal } from '../components/WalletModal';
 
 interface CreateAgreementPageProps {
   initialParsed: ParsedAgreementInput;
@@ -65,6 +68,7 @@ export const CreateAgreementPage: React.FC<CreateAgreementPageProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
 
   const numAmount = parseFloat(amount) || 0;
 
@@ -117,11 +121,19 @@ export const CreateAgreementPage: React.FC<CreateAgreementPageProps> = ({
   };
 
   const handleCreate = async () => {
+    const activeWallet = stellarWalletService.getAddress();
+    if (!activeWallet) {
+      setError('Please connect your Stellar wallet first before creating an escrow.');
+      setWalletModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       const created = await api.createAgreement({
+        initiator: activeWallet,
         counterparty,
         counterpartyType,
         amount: numAmount,
@@ -418,6 +430,14 @@ export const CreateAgreementPage: React.FC<CreateAgreementPageProps> = ({
           )}
         </button>
       </div>
+
+      {/* Multi-Wallet Modal */}
+      <WalletModal
+        isOpen={walletModalOpen}
+        onClose={() => setWalletModalOpen(false)}
+        activeAddress={stellarWalletService.getAddress()}
+        activeWalletId={stellarWalletService.getWalletId()}
+      />
     </div>
   );
 };

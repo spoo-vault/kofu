@@ -3,7 +3,8 @@ import { Agreement, Transaction } from '@kofu/shared';
 import { api } from '../lib/api';
 import { FirestoreService } from '../lib/firestoreService';
 import { stellarWalletService } from '../lib/stellarWallets';
-import { Layers, ArrowRight, ExternalLink, ShieldCheck, CheckCircle2, Clock } from 'lucide-react';
+import { Layers, ArrowRight, ExternalLink, ShieldCheck, CheckCircle2, Clock, Wallet } from 'lucide-react';
+import { WalletModal } from '../components/WalletModal';
 
 interface ActivityPageProps {
   onSelectAgreement: (id: string) => void;
@@ -11,6 +12,7 @@ interface ActivityPageProps {
 
 export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement }) => {
   const [walletAddress, setWalletAddress] = useState<string | null>(stellarWalletService.getAddress());
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeView, setActiveView] = useState<'agreements' | 'transactions'>('agreements');
@@ -89,14 +91,30 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
         </div>
       </div>
 
-      {/* Agreements Feed */}
-      {activeView === 'agreements' && (
+      {/* If wallet is not connected, do not show any session history */}
+      {!walletAddress ? (
+        <div className="p-12 text-center bg-[#0D0D11] border border-[#1E1E28] rounded-xl space-y-4">
+          <div className="w-12 h-12 rounded-full bg-[#121217] border border-[#1E1E28] flex items-center justify-center mx-auto text-[#00FF66]">
+            <Wallet className="w-6 h-6" />
+          </div>
+          <div className="text-base text-[#F3F3F6] font-bold">Wallet Connection Required</div>
+          <p className="text-xs text-[#848494] max-w-md mx-auto">
+            Connect your Stellar wallet to view your private escrow sessions, balances, and on-chain settlement ledger.
+          </p>
+          <button
+            onClick={() => setWalletModalOpen(true)}
+            className="px-5 py-2.5 rounded-lg bg-[#00FF66] hover:bg-[#00D154] text-[#08080A] font-bold text-xs uppercase tracking-wider font-mono transition-all cursor-pointer shadow-[0_0_15px_rgba(0,255,102,0.2)]"
+          >
+            Connect Wallet
+          </button>
+        </div>
+      ) : activeView === 'agreements' ? (
         <div className="space-y-3">
           {agreements.length === 0 ? (
             <div className="p-12 text-center bg-[#0D0D11] border border-[#1E1E28] rounded-lg space-y-2">
-              <div className="text-sm text-[#EDEDED] font-semibold">No active agreements recorded</div>
+              <div className="text-sm text-[#EDEDED] font-semibold">No active agreements for this account</div>
               <p className="text-xs text-[#848494] max-w-md mx-auto">
-                Create your first programmable economic agreement from the Command Center to lock an escrow on Stellar Soroban.
+                Create an agreement from the Command Center to lock an escrow on Stellar Soroban with this connected address.
               </p>
             </div>
           ) : (
@@ -159,10 +177,8 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
             })
           )}
         </div>
-      )}
-
-      {/* Transactions Feed */}
-      {activeView === 'transactions' && (
+      ) : (
+        /* Transactions Feed */
         <div className="space-y-3">
           {transactions.length === 0 ? (
             <div className="p-12 text-center bg-[#0D0D11] border border-[#1E1E28] rounded-lg space-y-2">
@@ -214,6 +230,14 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({ onSelectAgreement })
           )}
         </div>
       )}
+
+      {/* Multi-Wallet Modal */}
+      <WalletModal
+        isOpen={walletModalOpen}
+        onClose={() => setWalletModalOpen(false)}
+        activeAddress={walletAddress}
+        activeWalletId={stellarWalletService.getWalletId()}
+      />
     </div>
   );
 };
