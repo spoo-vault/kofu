@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Agreement, AgreementEvent, AgreementState } from '@kofu/shared';
 import { api } from '../lib/api';
 import { FirestoreService } from '../lib/firestoreService';
-import { SorobanEscrowClient } from '../lib/sorobanClient';
+import { SorobanEscrowClient, formatSorobanError } from '../lib/sorobanClient';
 import { PolicyBadge } from '../components/PolicyBadge';
 import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
 import { WalletModal } from '../components/WalletModal';
@@ -193,12 +193,8 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
 
       if (isExplicitCancellation) {
         setError('Transaction signature was cancelled in your wallet.');
-      } else if (msg.toLowerCase().includes('balance') || msg.toLowerCase().includes('underfunded') || msg.toLowerCase().includes('sufficient')) {
-        setError(`Insufficient Testnet Balance: ${msg}`);
-      } else if (msg.includes('mismatch') || msg.includes('Testnet') || msg.includes('Public Network')) {
-        setError(msg);
       } else {
-        setError(msg.startsWith('Stellar') ? msg : `Stellar Testnet Notice: ${msg}`);
+        setError(formatSorobanError(msg));
       }
     } finally {
       setActionLoading(false);
@@ -301,7 +297,7 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
       if (isExplicitCancellation) {
         setError('Transaction signature was cancelled in your wallet.');
       } else {
-        setError(msg.startsWith('Stellar') ? msg : `Stellar Testnet Settlement Notice: ${msg}`);
+        setError(formatSorobanError(msg));
       }
     } finally {
       setActionLoading(false);
@@ -354,12 +350,10 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
         msg.toLowerCase().includes('user cancelled') ||
         msg.toLowerCase().includes('signature was cancelled');
 
-      if (msg.includes('TimeoutNotReached') || msg.includes('8')) {
-        setError('Soroban Notice: Escrow timeout ledger has not yet elapsed.');
-      } else if (isExplicitCancellation) {
+      if (isExplicitCancellation) {
         setError('Transaction signature was cancelled in your wallet.');
       } else {
-        setError(msg.startsWith('Stellar') ? msg : `Stellar Testnet Refund Notice: ${msg}`);
+        setError(formatSorobanError(msg));
       }
     } finally {
       setActionLoading(false);
@@ -782,9 +776,15 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
                     setActionLoading(true);
                     setError(null);
                     try {
-                      const res = await api.fundEscrow(agreement.id);
-                      setAgreement(res.agreement);
-                      setEvents(res.events);
+                      if (agreement.status === 'CONDITION_MET') {
+                        const res = await api.releaseSettlement(agreement.id);
+                        setAgreement(res.agreement);
+                        setEvents(res.events);
+                      } else {
+                        const res = await api.fundEscrow(agreement.id);
+                        setAgreement(res.agreement);
+                        setEvents(res.events);
+                      }
                     } catch (simErr: any) {
                       setError(simErr?.message);
                     } finally {
@@ -792,9 +792,9 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
                     }
                   }}
                   className="px-2.5 py-1 rounded bg-[#00FF66]/15 hover:bg-[#00FF66]/25 text-[#00FF66] border border-[#00FF66]/30 font-mono text-[11px] cursor-pointer ml-auto transition-colors"
-                  title="Simulate escrow lock directly using autonomous agent"
+                  title="Complete action directly in demo mode"
                 >
-                  🤖 Quick-Fund via Demo Agent
+                  {agreement.status === 'CONDITION_MET' ? '🤖 Settle Payout (Demo Mode)' : '🤖 Quick-Fund via Demo Agent'}
                 </button>
               </div>
             </div>

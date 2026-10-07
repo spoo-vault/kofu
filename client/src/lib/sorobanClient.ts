@@ -353,3 +353,32 @@ export class SorobanEscrowClient {
     };
   }
 }
+
+/**
+ * Translates Soroban contract execution and host errors into user-friendly diagnostic messages
+ */
+export function formatSorobanError(rawMsg: string): string {
+  if (rawMsg.includes('Error(Contract, #5)') || rawMsg.includes('AgreementNotFound')) {
+    return 'Escrow Not Found On-Chain: Funds for this agreement were never deposited into the Soroban smart contract on Stellar Testnet, so there is no on-chain balance to release.';
+  }
+  if (rawMsg.includes('Error(Contract, #3)') || rawMsg.includes('Unauthorized')) {
+    return 'Unauthorized: Only the agreement buyer or authorized Sentinel can execute this contract action.';
+  }
+  if (rawMsg.includes('Error(Contract, #4)') || rawMsg.includes('AgreementAlreadyExists')) {
+    return 'Escrow Already Exists: An escrow deposit is already recorded for this agreement ID.';
+  }
+  if (rawMsg.includes('Error(Contract, #6)') || rawMsg.includes('InvalidStatus')) {
+    return 'Invalid Escrow Status: The on-chain contract is not in the required state for this operation.';
+  }
+  if (rawMsg.includes('Error(Contract, #8)') || rawMsg.includes('TimeoutNotReached')) {
+    return 'Timeout Not Reached: The escrow deadline has not yet elapsed on the Stellar ledger.';
+  }
+  if (rawMsg.includes('Error(Contract, #10)') || rawMsg.toLowerCase().includes('balance is not sufficient')) {
+    return 'Insufficient Balance: Your wallet does not hold enough XLM/tokens on Stellar Testnet for this deposit.';
+  }
+  if (rawMsg.includes('Error(Contract, #13)') || rawMsg.toLowerCase().includes('trustline entry is missing')) {
+    return 'Missing Token Trustline: The connected account does not have a trustline for this token. Deposit will use native XLM SAC.';
+  }
+  return rawMsg;
+}
+
