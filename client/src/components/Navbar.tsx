@@ -11,7 +11,8 @@ import {
   ExternalLink,
   Code2,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
 import { WalletModal } from './WalletModal';
@@ -215,23 +216,37 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate }) => {
             </div>
           ) : (
             /* Wallet button in app */
-            <button
-              onClick={() => setWalletModalOpen(true)}
-              className="flex items-center space-x-1.5 sm:space-x-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded bg-[#121217] hover:bg-[#1A1A22] border border-[#1E1E28] hover:border-[#00FF66]/50 text-[11px] sm:text-xs font-mono transition-all cursor-pointer whitespace-nowrap"
-              title="Connect Stellar Multi-Wallet (LOBSTR, Freighter, Albedo, xBull)"
-            >
-              {walletAddress ? (
-                <CheckCircle2 className="w-3 h-3 text-[#00FF66]" />
-              ) : (
-                <Wallet className="w-3 h-3 text-[#848494]" />
+            <div className="flex items-center space-x-1.5">
+              <button
+                onClick={() => setWalletModalOpen(true)}
+                className="flex items-center space-x-1.5 sm:space-x-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded bg-[#121217] hover:bg-[#1A1A22] border border-[#1E1E28] hover:border-[#00FF66]/50 text-[11px] sm:text-xs font-mono transition-all cursor-pointer whitespace-nowrap"
+                title="Connect Stellar Multi-Wallet (LOBSTR, Freighter, Albedo, xBull)"
+              >
+                {walletAddress ? (
+                  <CheckCircle2 className="w-3 h-3 text-[#00FF66]" />
+                ) : (
+                  <Wallet className="w-3 h-3 text-[#848494]" />
+                )}
+                <span className={walletAddress ? 'text-[#00FF66]' : 'text-[#F3F3F6]'}>
+                  {displayAddress}
+                </span>
+                <span className="text-[#848494] hidden md:inline text-[10px] capitalize">
+                  {walletAddress ? (walletId || 'Stellar') : 'Signers'}
+                </span>
+              </button>
+
+              {walletAddress && (
+                <button
+                  onClick={async () => {
+                    await stellarWalletService.disconnect();
+                  }}
+                  className="p-1 sm:p-1.5 rounded bg-[#121217] hover:bg-[#FF4D4D]/15 border border-[#1E1E28] hover:border-[#FF4D4D]/50 text-[#848494] hover:text-[#FF4D4D] transition-colors"
+                  title="Disconnect Wallet"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
               )}
-              <span className={walletAddress ? 'text-[#00FF66]' : 'text-[#F3F3F6]'}>
-                {displayAddress}
-              </span>
-              <span className="text-[#848494] hidden md:inline text-[10px] capitalize">
-                {walletAddress ? (walletId || 'Stellar') : 'Signers'}
-              </span>
-            </button>
+            </div>
           )}
         </div>
       </div>

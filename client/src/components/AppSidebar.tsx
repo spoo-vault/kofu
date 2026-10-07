@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Shield,
   Clock,
-  Sparkles
+  Sparkles,
+  LogOut
 } from 'lucide-react';
 import { Agreement } from '@kofu/shared';
 import { stellarWalletService, SupportedWalletId } from '../lib/stellarWallets';
@@ -300,30 +301,45 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         )}
 
         {/* Wallet Account Box */}
-        <button
-          onClick={() => setWalletModalOpen(true)}
-          className={`w-full flex items-center space-x-2 px-2.5 py-2 rounded-lg bg-[#121217] hover:bg-[#16161D] border border-[#1E1E28] hover:border-[#00FF66]/40 text-xs font-mono transition-all text-left cursor-pointer ${
-            collapsed ? 'justify-center px-0' : ''
-          }`}
-          title="Stellar Wallets (LOBSTR, Freighter, Albedo, xBull)"
-        >
-          {walletAddress ? (
-            <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF66] shrink-0" />
-          ) : (
-            <Wallet className="w-3.5 h-3.5 text-[#848494] shrink-0" />
-          )}
+        <div className="flex items-center space-x-1.5">
+          <button
+            onClick={() => setWalletModalOpen(true)}
+            className={`flex-1 min-w-0 flex items-center space-x-2 px-2.5 py-2 rounded-lg bg-[#121217] hover:bg-[#16161D] border border-[#1E1E28] hover:border-[#00FF66]/40 text-xs font-mono transition-all text-left cursor-pointer ${
+              collapsed ? 'justify-center px-0' : ''
+            }`}
+            title="Stellar Wallets (Freighter, LOBSTR, Albedo, xBull)"
+          >
+            {walletAddress ? (
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#00FF66] shrink-0" />
+            ) : (
+              <Wallet className="w-3.5 h-3.5 text-[#848494] shrink-0" />
+            )}
 
-          {!collapsed && (
-            <div className="flex-1 truncate">
-              <div className={walletAddress ? 'text-[#00FF66] font-medium' : 'text-[#F3F3F6]'}>
-                {displayAddress}
+            {!collapsed && (
+              <div className="flex-1 truncate">
+                <div className={walletAddress ? 'text-[#00FF66] font-medium' : 'text-[#F3F3F6]'}>
+                  {displayAddress}
+                </div>
+                <div className="text-[9px] text-[#505060] capitalize">
+                  {walletAddress ? `${walletId || 'Stellar'} Connected` : 'Connect Multi-Wallet'}
+                </div>
               </div>
-              <div className="text-[9px] text-[#505060] capitalize">
-                {walletAddress ? `${walletId || 'Stellar'} Connected` : 'Connect Multi-Wallet'}
-              </div>
-            </div>
+            )}
+          </button>
+
+          {walletAddress && !collapsed && (
+            <button
+              onClick={async (e) => {
+                e.stopPropagation();
+                await stellarWalletService.disconnect();
+              }}
+              className="p-2 rounded-lg bg-[#121217] hover:bg-[#FF4D4D]/15 border border-[#1E1E28] hover:border-[#FF4D4D]/50 text-[#848494] hover:text-[#FF4D4D] transition-colors shrink-0"
+              title="Disconnect Wallet"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           )}
-        </button>
+        </div>
       </div>
 
       {/* Multi-Wallet Connection Modal */}

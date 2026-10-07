@@ -15,7 +15,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ status }) => {
   const shortContract = `${contractId.substring(0, 4)}...${contractId.substring(contractId.length - 4)}`;
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#1E1E28] bg-[#08080A]/95 backdrop-blur-md py-2 px-4 text-[11px] font-mono">
+    <footer className="border-t border-[#1E1E28] bg-[#08080A] py-2 px-4 text-[11px] font-mono shrink-0 z-20">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-y-2">
         <div className="flex items-center space-x-6 text-[#848494]">
           <div className="flex items-center space-x-1.5">

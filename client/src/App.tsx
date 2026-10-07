@@ -186,7 +186,7 @@ export function App() {
         />
 
         {/* Scrollable Workspace Pages */}
-        <main className="flex-1 overflow-y-auto pb-14">
+        <main className="flex-1 overflow-y-auto">
           {currentTab === 'home' && (
             <HomePage
               onParsed={handleParsed}

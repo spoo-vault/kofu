@@ -7,6 +7,9 @@ import {
   requestAccess as requestFreighterAccess,
   getAddress as getFreighterAddress,
   signTransaction as signFreighterTransaction,
+  isAllowed as isFreighterAllowed,
+  isConnected as isFreighterConnected,
+  WatchWalletChanges,
 } from '@stellar/freighter-api';
 
 export type SupportedWalletId = 'freighter' | 'lobstr' | 'xbull' | 'albedo' | 'agent';
@@ -64,9 +67,29 @@ class StellarWalletService {
   private currentWallet: SupportedWalletId | null = null;
   private currentAddress: string | null = null;
   private listeners: ((address: string | null, walletId: SupportedWalletId | null) => void)[] = [];
+  private freighterWatcher: WatchWalletChanges | null = null;
 
   constructor() {
     this.restoreSession();
+    this.setupWatcher();
+  }
+
+  private setupWatcher() {
+    if (typeof window === 'undefined') return;
+    try {
+      this.freighterWatcher = new WatchWalletChanges(1500);
+      this.freighterWatcher.watch((params) => {
+        if (this.currentWallet === 'freighter') {
+          if (params.error || !params.address) {
+            this.clearSession();
+          } else if (params.address && params.address !== this.currentAddress) {
+            this.setConnected(params.address, 'freighter');
+          }
+        }
+      });
+    } catch {
+      // Extension not installed or watcher unavailable
+    }
   }
 
   private initKit() {
@@ -109,11 +132,38 @@ class StellarWalletService {
       const savedAddress = localStorage.getItem('kofu_wallet_address');
       const savedWallet = localStorage.getItem('kofu_wallet_id') as SupportedWalletId | null;
       if (savedAddress) {
+        if (savedWallet === 'freighter') {
+          // Do not blindly trust cached freighter address if extension revoked permission
+          this.verifyFreighterSession(savedAddress);
+          return;
+        }
         this.currentAddress = savedAddress;
         this.currentWallet = savedWallet || 'freighter';
       }
     } catch {
       // LocalStorage unavailable
+    }
+  }
+
+  public async verifyFreighterSession(expectedAddress?: string): Promise<boolean> {
+    try {
+      const allowedRes = await isFreighterAllowed();
+      if (!allowedRes?.isAllowed) {
+        // Site not allowed in Freighter - clear unverified cache
+        this.clearSession();
+        return false;
+      }
+      const addrRes = await getFreighterAddress();
+      if (addrRes?.address && !addrRes.error) {
+        this.setConnected(addrRes.address, 'freighter');
+        return true;
+      } else {
+        this.clearSession();
+        return false;
+      }
+    } catch {
+      this.clearSession();
+      return false;
     }
   }
 
@@ -188,8 +238,12 @@ class StellarWalletService {
           this.setConnected(access.address, 'freighter');
           return { address: access.address, walletId: 'freighter' };
         }
-      } catch (fErr) {
-        console.warn('Direct Freighter requestAccess notice, attempting StellarWalletsKit:', fErr);
+        if (access?.error) {
+          throw new Error(typeof access.error === 'string' ? access.error : 'Freighter connection approval was rejected');
+        }
+      } catch (fErr: any) {
+        console.warn('Freighter requestAccess notice:', fErr);
+        throw new Error(fErr?.message || 'Freighter access rejected. Please unlock Freighter and approve access.');
       }
     }
 
@@ -243,14 +297,28 @@ class StellarWalletService {
 
     if (this.currentWallet === 'freighter') {
       try {
+        // Ensure site is authorized first so Freighter doesn't show "not connected" warning
+        const allowedRes = await isFreighterAllowed();
+        if (!allowedRes?.isAllowed) {
+          const access = await requestFreighterAccess();
+          if (access?.error || !access?.address) {
+            throw new Error('Please approve connection in Freighter before signing.');
+          }
+          this.setConnected(access.address, 'freighter');
+        }
+
         const fRes = await signFreighterTransaction(xdr, {
           networkPassphrase: Networks.TESTNET,
         });
         if (fRes?.signedTxXdr && !fRes.error) {
           return { signedTxXdr: fRes.signedTxXdr };
         }
-      } catch (fErr) {
-        console.warn('Direct Freighter signTransaction notice, trying Kit fallback:', fErr);
+        if (fRes?.error) {
+          throw new Error(typeof fRes.error === 'string' ? fRes.error : 'Freighter transaction signing rejected');
+        }
+      } catch (fErr: any) {
+        console.warn('Freighter signTransaction notice, trying Kit fallback:', fErr);
+        throw fErr;
       }
     }
 
