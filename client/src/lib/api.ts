@@ -337,6 +337,35 @@ export const api = {
     return { agreement: list[idx] || list[0], txHash: hash, events: [] };
   },
 
+  async refundEscrow(id: string): Promise<{ agreement: Agreement; txHash: string; events: AgreementEvent[] }> {
+    try {
+      const res = await fetch(`${API_BASE}/agreements/${id}/refund`, { method: 'POST' });
+      if (res.ok) return await res.json();
+    } catch {
+      // Fallback
+    }
+
+    const list = getStoredAgreements();
+    const idx = list.findIndex((a) => a.id === id);
+    const hash = Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    if (idx !== -1) {
+      list[idx].status = 'REFUNDED';
+      list[idx].stellarTxHash = hash;
+      list[idx].updatedAt = new Date().toISOString();
+      saveStoredAgreements(list);
+      FirestoreService.saveAgreement(list[idx]);
+      FirestoreService.logEvent({
+        id: `ev-${Date.now()}`,
+        agreementId: list[idx].id,
+        type: 'ESCROW_REFUNDED',
+        message: `Escrow refunded: ${list[idx].amount} ${list[idx].currency} returned to buyer due to timeout / cancel. Tx: ${hash}`,
+        timestamp: list[idx].updatedAt,
+        actor: 'STELLAR_NETWORK'
+      });
+    }
+    return { agreement: list[idx] || list[0], txHash: hash, events: [] };
+  },
+
   async getTransactions(walletAddress?: string): Promise<Transaction[]> {
     const activeWallet = walletAddress || stellarWalletService.getAddress();
     try {

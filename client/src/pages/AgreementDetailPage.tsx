@@ -295,6 +295,59 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
     }
   };
 
+  // Party 1 (Buyer) reclaims escrowed funds upon timeout or cancellation
+  const handleRefundEscrow = async () => {
+    if (!agreement) return;
+
+    if (!stellarWalletService.isConnected()) {
+      setWalletModalOpen(true);
+      setError('Please connect your Stellar wallet to claim refund.');
+      return;
+    }
+
+    setActionLoading(true);
+    setError(null);
+    try {
+      const isRealBrowserWallet = walletId && walletId !== 'agent';
+      if (isRealBrowserWallet) {
+        const refundRes = await SorobanEscrowClient.refundEscrowOnChain(agreement);
+        const updatedAgr: Agreement = {
+          ...agreement,
+          status: 'REFUNDED',
+          stellarTxHash: refundRes.txHash,
+          updatedAt: new Date().toISOString(),
+        };
+        setAgreement(updatedAgr);
+        await FirestoreService.saveAgreement(updatedAgr);
+        await FirestoreService.logEvent({
+          id: `ev-${Date.now()}`,
+          agreementId: agreement.id,
+          type: 'ESCROW_REFUNDED',
+          message: `Escrow refunded on-chain via Soroban. Ledger: ${refundRes.ledger || 'confirmed'}. Tx: ${refundRes.txHash}`,
+          timestamp: updatedAgr.updatedAt,
+          actor: 'STELLAR_NETWORK',
+        });
+        return;
+      }
+
+      const res = await api.refundEscrow(agreement.id);
+      setAgreement(res.agreement);
+      setEvents(res.events);
+    } catch (err: any) {
+      console.error('Real on-chain escrow refund error:', err);
+      const msg = err?.message || 'Failed to refund escrow on Stellar Testnet';
+      if (msg.includes('TimeoutNotReached') || msg.includes('8')) {
+        setError('Soroban Notice: Escrow timeout ledger has not yet elapsed.');
+      } else if (msg.includes('declined') || msg.includes('cancel') || msg.includes('reject')) {
+        setError('Transaction signature was cancelled in your wallet.');
+      } else {
+        setError(`Stellar Testnet Refund Notice: ${msg}`);
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // Party 1 or Party 2 triggers on-chain dispute freeze
   const handleTriggerDispute = async () => {
     if (!agreement) return;
@@ -732,14 +785,26 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
             )}
 
             {(agreement.status === 'ESCROWED' || agreement.status === 'MONITORING') && (
-              <button
-                onClick={handleSatisfyCondition}
-                disabled={actionLoading}
-                className="px-5 py-2.5 bg-[#00FF66] hover:bg-[#00D154] disabled:bg-[#1E1E28] disabled:text-[#505060] text-[#08080A] font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center space-x-2 cursor-pointer shadow-[0_0_15px_rgba(0,255,102,0.2)]"
-              >
-                {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                <span>MARK CONDITION SATISFIED (MANUAL SIGN-OFF)</span>
-              </button>
+              <>
+                <button
+                  onClick={handleSatisfyCondition}
+                  disabled={actionLoading}
+                  className="px-5 py-2.5 bg-[#00FF66] hover:bg-[#00D154] disabled:bg-[#1E1E28] disabled:text-[#505060] text-[#08080A] font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center space-x-2 cursor-pointer shadow-[0_0_15px_rgba(0,255,102,0.2)]"
+                >
+                  {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                  <span>MARK CONDITION SATISFIED (MANUAL SIGN-OFF)</span>
+                </button>
+
+                <button
+                  onClick={handleRefundEscrow}
+                  disabled={actionLoading}
+                  className="px-4 py-2.5 bg-[#121217] hover:bg-[#1E1E28] border border-[#FFB800]/50 hover:border-[#FFB800] text-[#FFB800] font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center space-x-2 cursor-pointer"
+                  title="Claim refund if deliverable deadline has elapsed without completion"
+                >
+                  {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Clock className="w-3.5 h-3.5" />}
+                  <span>CLAIM TIMEOUT REFUND</span>
+                </button>
+              </>
             )}
 
             {agreement.status === 'CONDITION_MET' && (
@@ -751,6 +816,13 @@ export const AgreementDetailPage: React.FC<AgreementDetailPageProps> = ({
                 {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                 <span>RELEASE PAYMENT TO {agreement.counterparty.toUpperCase()} ON STELLAR</span>
               </button>
+            )}
+
+            {agreement.status === 'REFUNDED' && (
+              <div className="flex items-center space-x-2.5 text-xs text-[#FFB800] font-bold py-1">
+                <CheckCircle2 className="w-4 h-4 text-[#FFB800]" />
+                <span>ESCROW REFUNDED BACK TO BUYER ON STELLAR SOROBAN</span>
+              </div>
             )}
 
             {agreement.status === 'SETTLED' && (

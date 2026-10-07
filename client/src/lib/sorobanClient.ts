@@ -291,4 +291,56 @@ export class SorobanEscrowClient {
       explorerUrl: `https://stellar.expert/explorer/testnet/tx/${sendRes.hash}`,
     };
   }
+
+  /**
+   * Refunds escrowed funds back to the buyer on-chain upon timeout or cancellation
+   */
+  public static async refundEscrowOnChain(agreement: Agreement): Promise<EscrowFundingResult> {
+    const callerAddress = stellarWalletService.getAddress();
+    if (!callerAddress) {
+      throw new Error('No Stellar wallet connected. Please connect your wallet to claim refund.');
+    }
+
+    const rawSymbol = agreement.id.replace(/[^a-zA-Z0-9_]/g, '_');
+    const symbolStr = rawSymbol.length > 30 ? rawSymbol.substring(0, 30) : rawSymbol;
+
+    const account = await this.rpcServer.getAccount(callerAddress);
+    const tx = new TransactionBuilder(account, {
+      fee: '100000',
+      networkPassphrase: TESTNET_PASSPHRASE,
+    })
+      .addOperation(
+        Operation.invokeContractFunction({
+          contract: CONTRACT_ID,
+          function: 'refund',
+          args: [
+            nativeToScVal(symbolStr, { type: 'symbol' }),
+            new Address(callerAddress).toScVal(),
+          ],
+        })
+      )
+      .setTimeout(300)
+      .build();
+
+    console.log('[SorobanClient] Simulating refund on Soroban...');
+    const prepared = await this.rpcServer.prepareTransaction(tx);
+    const { signedTxXdr } = await stellarWalletService.signTransaction(prepared.toXDR());
+    const signedTx = TransactionBuilder.fromXDR(signedTxXdr, TESTNET_PASSPHRASE);
+    const sendRes = await this.rpcServer.sendTransaction(signedTx);
+
+    if (sendRes.status === 'ERROR') {
+      throw new Error(`Stellar RPC rejected refund: ${JSON.stringify(sendRes.errorResult)}`);
+    }
+
+    console.log(`[SorobanClient] Refund broadcast! Hash: ${sendRes.hash}. Waiting for ledger inclusion...`);
+    const pollRes = await this.rpcServer.pollTransaction(sendRes.hash);
+
+    return {
+      success: pollRes.status === 'SUCCESS',
+      txHash: sendRes.hash,
+      ledger: pollRes.latestLedger,
+      contractId: CONTRACT_ID,
+      explorerUrl: `https://stellar.expert/explorer/testnet/tx/${sendRes.hash}`,
+    };
+  }
 }
